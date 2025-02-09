@@ -1,12 +1,5 @@
 from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
-
-
-@login_required
-
-def dashboard(request):
-    return render(request, 'dashboard.html')
 
 def authView(request):
     if request.method == 'POST':
