@@ -1,0 +1,11 @@
+<h1>Dashboard page</h1>
+
+<h3>Display user progress, etc</h3>
+
+{% if user.is_authenticated %}
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <p>Logged in as {{ user.username}} </p>
+        <button type="submit">Logout</button>
+    </form>
+{% endif %}

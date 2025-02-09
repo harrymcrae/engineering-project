@@ -1,8 +1,8 @@
 from django.urls import path, include
 from . import views
+from dashboard import views as dviews
 
 urlpatterns = [
     path('register/', views.authView),
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('dashboard/', views.dashboard),
+    path('dashboard/', dviews.dashboard_page),
 ]
