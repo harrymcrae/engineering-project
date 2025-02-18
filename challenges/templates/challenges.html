@@ -51,7 +51,7 @@
         }
 
         .daily-quiz-card:hover {
-            transform: translateY(-52%) scale(1.05);  /* Subtle hover effect */
+            transform: translateY(-22%) scale(1.05);
             box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.3);
         }
         /* Modal Background */
@@ -182,7 +182,7 @@
         <div class="registration-bonus-card" id="registrationBonusCard">
             <h3>Registration Bonus 📝</h3>
             <p>Claim one-time registration bonus!</p>
-            <button class="registration-bonus-claim-btn" id="claimRegistrationBonusBtn" onmousedown="claimRegistrationBonus()">Claim Bonus</button>
+            <button class="registration-bonus-claim-btn" id="claimRegistrationBonusBtn">Claim Bonus</button>
         </div>
     </div>
 
@@ -266,19 +266,61 @@
 
     </script>
 
-    <!-- Code for Daily Bonus -->
+    <!-- Code for Registration Bonus -->
      <script>
-        function claimRegistrationBonus() {
-            alert("Registration bonus has been claimed! 🎉");
-            document.getElementById("registrationBonusCard").style.display="none";
-            localStorage.setItem("registrationBonusClaimed", "true");
-        }
-
         window.onload = function() {
-            if (localStorage.getItem("registrationBonusClaimed") === "true") {
-                document.getElementById("registrationBonusCard").style.display = "none";
-            }
+            // AJAX request to check if the registration bonus has been claimed
+            fetch("{% url 'check_registration_bonus_claimed' %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.registration_bonus_claimed) {
+                        document.getElementById("registrationBonusCard").style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
         };
+
+        document.getElementById("claimRegistrationBonusBtn").addEventListener("click", function() {
+            // AJAX request
+            fetch("{% url 'claim_registration_bonus' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", 
+                    "X-CSRFToken": getCookie("csrftoken")  // CSRF token for security
+                },
+                body: JSON.stringify({ action: 'claim_bonus' }) 
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("registrationBonusCard").style.display = "none";
+                    alert("Registration bonus claimed! 🎉");
+                } else {
+                    alert("You have already claimed the registration bonus!");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+
+        // Function to get CSRF token from cookies (for security)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
      </script>
 </body>
 </html>
