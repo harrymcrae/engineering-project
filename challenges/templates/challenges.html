@@ -36,8 +36,9 @@
             border-bottom: 10px solid var(--secondary-color);
         }
 
-        .daily-challenge-card,
-        .daily-bonus-card {
+        .daily-quiz-card,
+        .daily-bonus-card,
+        .registration-bonus-card {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             padding: 25px;
             border-radius: 12px;
@@ -49,7 +50,7 @@
             text-align: center;
         }
 
-        .daily-challenge-card:hover {
+        .daily-quiz-card:hover {
             transform: translateY(-52%) scale(1.05);  /* Subtle hover effect */
             box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.3);
         }
@@ -88,6 +89,7 @@
             cursor: pointer;
         }
 
+        .registration-bonus-claim-btn,
         .daily-bonus-claim-btn {
             background: var(--primary-color);
             color: white;
@@ -98,6 +100,7 @@
             margin-top: 15px;
         }
 
+        .registration-bonus-claim-btn:hover,
         .daily-bonus-claim-btn:hover:not(:disabled) {
             background: darkblue;
         }
@@ -110,17 +113,17 @@
 
         .challenge-container {
             display: flex;
-            flex-direction: row;  /* Stack them vertically */
-            align-items: center;  /* Center them */
+            flex-direction: row;
+            align-items: center;
             justify-content: center ;
-            gap: 20px;  /* Space between them */
+            gap: 20px;
             padding: 20px;
         }
 
         /* Adjust for larger screens */
         @media (min-width: 768px) {
             .daily-section {
-                flex-direction: row;  /* Align them in a row */
+                flex-direction: row;
                 justify-content: center;
             }
         }
@@ -162,44 +165,51 @@
     </header>
 
     <div class="challenge-container">
-        <!-- Daily Challenge Section -->
-        <div class="daily-challenge-card" onclick="openModal()" >
-            <h3>Daily Challenge 🔥</h3>
-            <p>Click to view the daily challenge!</p>
+        <!-- Daily Quiz Section -->
+        <div class="daily-quiz-card" onclick="openModal()" >
+            <h3>Daily Quiz 🔥</h3>
+            <p>Click to view the daily quiz!</p>
         </div>
 
         <!-- Daily Bonus Section -->
         <div class="daily-bonus-card">
             <h3>Daily Bonus ⏰</h3>
             <p>Claim your free daily bonus!</p>
-            <button class="daily-bonus-claim-btn" id="claimBonusBtn" onmousedown="claimBonus()">Claim Bonus</button>
+            <button class="daily-bonus-claim-btn" id="claimDailyBonusBtn" onmousedown="claimDailyBonus()">Claim Bonus</button>
+        </div>
+
+        <!-- Registration Bonus Section -->
+        <div class="registration-bonus-card" id="registrationBonusCard">
+            <h3>Registration Bonus 📝</h3>
+            <p>Claim one-time registration bonus!</p>
+            <button class="registration-bonus-claim-btn" id="claimRegistrationBonusBtn" onmousedown="claimRegistrationBonus()">Claim Bonus</button>
         </div>
     </div>
 
 
-    <!-- Daily Challenge Model -->
-    <div id="challengeModal" class="modal">
+    <!-- Daily Quiz Model -->
+    <div id="quizModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2>Daily Challenge</h2>
-            <p>Participate in sustainability challenges around campus and earn points!</p>
+            <h2>Daily Quiz</h2>
+            <p>Daily quiz will appear here!</p>
         </div>
     </div>
 
     <script>
         function openModal() {
-            document.getElementById("challengeModal").style.display = "flex";
+            document.getElementById("quizModal").style.display = "flex";
         }
         
         function closeModal() {
-            document.getElementById("challengeModal").style.display = "none";
+            document.getElementById("quizModal").style.display = "none";
         }
     </script>
 
 
     <!-- Code for Daily Bonus -->
     <script>
-        let btn = document.getElementById("claimBonusBtn");
+        let btn = document.getElementById("claimDailyBonusBtn");
         let lastClaimTime = localStorage.getItem("lastClaimTime");
 
         function updateButtonState() {
@@ -213,7 +223,7 @@
             }
         }
 
-        function claimBonus() {
+        function claimDailyBonus() {
             alert("Daily bonus has been claimed! 🎉");
             localStorage.setItem("lastClaimTime", Date.now());
             disableButtonWithCountdown(86400000); // 24-hour cooldown
@@ -252,8 +262,23 @@
         updateButtonState();
 
         // Attach event listener to button
-        btn.addEventListener("click", claimBonus);
+        btn.addEventListener("click", claimDailyBonus);
 
     </script>
+
+    <!-- Code for Daily Bonus -->
+     <script>
+        function claimRegistrationBonus() {
+            alert("Registration bonus has been claimed! 🎉");
+            document.getElementById("registrationBonusCard").style.display="none";
+            localStorage.setItem("registrationBonusClaimed", "true");
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem("registrationBonusClaimed") === "true") {
+                document.getElementById("registrationBonusCard").style.display = "none";
+            }
+        };
+     </script>
 </body>
 </html>
