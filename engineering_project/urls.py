@@ -28,4 +28,5 @@ urlpatterns = [
     path('logout/', LogoutView.as_view()),
     path('dashboard/', include('dashboard.urls')),
     path('challenges/', include('challenges.urls'))
+    path('map/', include('map.urls')),
 ]
