@@ -47,7 +47,7 @@
     </style>
 </head>
 <body>
-    <h2>Interactive Map</h2>    
+    <h2>Challenge Map</h2>    
     <div id="map"></div>
 
     <script>
@@ -59,15 +59,24 @@
         }).addTo(map);
 
         // Load GeoJSON data dynamically from Django view
-        fetch("{% url 'geojson_data' %}")  // This is a Django URL to serve GeoJSON
+        fetch('/map/geojson-data/')  // This is a Django URL to serve GeoJSON
             .then(response => response.json())
             .then(data => {
                 L.geoJSON(data, {
                     onEachFeature: function(feature, layer) {
                         var popupContent = `<h3>${feature.properties.name}</h3>
-                                            <img src="${feature.properties.image}" width="200px"/>
                                             <p>${feature.properties.description}</p>
-                                            <a href="${feature.properties.link}" target="_blank">More Info</a>`;
+                                            <p>Points: ${feature.properties.points}</p>
+                                            <button onclick="location.href='/challenges/'" style="
+                                                background-color: #4CAF50;
+                                                color: white;
+                                                padding: 8px 12px;
+                                                border: none;
+                                                border-radius: 5px;
+                                                cursor: pointer;
+                                                margin-top: 5px;
+                                        ">Go to Challenge</button>
+                                    `;
                         layer.bindPopup(popupContent);
                     }
                 }).addTo(map);

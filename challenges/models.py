@@ -7,6 +7,10 @@ class Challenge(models.Model):
     challenge_description = models.CharField(max_length=255,null=True)
     challenge_id = models.CharField(max_length=30, null=True)
     points_awarded = models.IntegerField(default=0)
+    #image = models.URLField(blank=True, null=True)
+    latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)
+
 
     def __str__(self):
         return f"{self.challenge_name} Challenge"
