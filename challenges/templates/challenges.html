@@ -36,9 +36,8 @@
             border-bottom: 10px solid var(--secondary-color);
         }
 
-        .daily-quiz-card,
-        .daily-bonus-card,
-        .registration-bonus-card {
+        .quiz-card,
+        .challenge-card {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             padding: 25px;
             border-radius: 12px;
@@ -50,7 +49,7 @@
             text-align: center;
         }
 
-        .daily-quiz-card:hover {
+        .quiz-card:hover {
             transform: translateY(-22%) scale(1.05);
             box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.3);
         }
@@ -128,6 +127,31 @@
             }
         }
 
+        .quiz-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .quiz-table td {
+            padding: 10px;
+        }
+
+        .quiz-option {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            background-color: #f9f9f9;
+            transition: 0.3s;
+        }
+
+        .quiz-option:hover {
+            background-color: #e0e0e0;
+        }
+
     </style>
 </head>
 <body>
@@ -165,124 +189,255 @@
     </header>
 
     <div class="challenge-container">
-        <!-- Daily Quiz Section -->
-        <div class="daily-quiz-card" onclick="openModal()" >
-            <h3>Daily Quiz 🔥</h3>
-            <p>Click to view the daily quiz!</p>
-        </div>
+        {% for quiz in quizzes %}
+            <div class="quiz-card" onclick="openModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+                <h3>{{ quiz.quiz_name }}</h3>
+                <p>{{quiz.quiz_description}}</p>
+            </div>
+        {% empty %}
+            <p>No quizzes available</p>
+        {% endfor %}
 
-        <!-- Daily Bonus Section -->
-        <div class="daily-bonus-card">
-            <h3>Daily Bonus ⏰</h3>
-            <p>Claim your free daily bonus!</p>
-            <button class="daily-bonus-claim-btn" id="claimDailyBonusBtn" onmousedown="claimDailyBonus()">Claim Bonus</button>
-        </div>
-
-        <!-- Registration Bonus Section -->
-        <div class="registration-bonus-card" id="registrationBonusCard">
-            <h3>Registration Bonus 📝</h3>
-            <p>Claim one-time registration bonus!</p>
-            <button class="registration-bonus-claim-btn" id="claimRegistrationBonusBtn">Claim Bonus</button>
-        </div>
+        {% for challenge in challenges %}
+            <div class="challenge-card" id="{{ challenge.challenge_id }}-card">
+                <h3>{{ challenge.challenge_name }} </h3>
+                <p>{{ challenge.challenge_description }}</p>
+                {% if challenge.challenge_id == 'daily-bonus' %}
+                    <button class="daily-bonus-claim-btn" id="claim-daily-bonus">Claim Bonus</button>
+                {% else %}
+                    <button class="{{ challenge.challenge_id }}-claim-btn" id="claim-{{ challenge.challenge_id }}">Claim Bonus</button>
+                {% endif %}
+                </div>
+        {% empty %}
+            <p>No challenges available.</p>
+        {% endfor %}
     </div>
 
+    <!-- Quiz Modal -->
+    {% for quiz in quizzes %}
+        <div id="{{ quiz.quiz_id }}-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal('{{ quiz.quiz_id }}')">&times;</span>
+                <h2 id="{{ quiz.quiz_id }}-title"></h2>
+                <p id="{{ quiz.quiz_id }}-question"></p>
 
-    <!-- Daily Quiz Model -->
-    <div id="quizModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2>Daily Quiz</h2>
-            <p>Daily quiz will appear here!</p>
+                <table class="quiz-table">
+                    <tr>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_one }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-1"></button></td>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_two }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-2"></button></td>
+                    </tr>
+                    <tr>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_three }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-3"></button></td>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_four }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-4"></button></td>
+                    </tr>
+                </table>
+                <p id="{{ quiz.quiz_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+            </div>
         </div>
-    </div>
+    {% endfor %}
 
+    <!-- Code for Quizzes -->
     <script>
-        function openModal() {
-            document.getElementById("quizModal").style.display = "flex";
+        let completedQuizzes = JSON.parse('{{ quizzes_completed|safe }}');
+
+        document.addEventListener("DOMContentLoaded", function() {
+            completedQuizzes.forEach(quizID => {
+                fetch(`check-quiz-completed/${quizID}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.quiz_completed) {
+                            disableButtons(quizID);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+            });
+        });
+
+        function openModal(quizID, quizName, quizQuestion, options) {
+            document.getElementById(quizID +"-modal").style.display = "flex";
+            document.getElementById(quizID +"-title").textContent = quizName;
+            document.getElementById(quizID +"-question").textContent = quizQuestion;
+
+            for(let i=0;i<4;i++) {
+                document.getElementById(quizID +`-answer-${i + 1}`).innerText = options[i]
+            }
         }
         
-        function closeModal() {
-            document.getElementById("quizModal").style.display = "none";
+        function closeModal(quizID) {
+            document.getElementById(quizID +"-modal").style.display = "none";
+        }
+
+        function selectOption(quizID, option, correctAnswer) {
+            if (option == correctAnswer) {
+                claimQuizReward(quizID);
+                disableButtons(quizID);
+                closeModal(quizID);
+            } else {
+                console.log("Incorrect");
+                document.getElementById(quizID+"-feedback").style.display = "flex";
+                document.getElementById(quizID+"-feedback").textContent = "Incorrect!"
+            }
+        }
+
+        function disableButtons(quizID) {
+            for(let i=0;i<4;i++) {
+                document.getElementById(quizID +`-answer-${i + 1}`).disabled = true;
+            }
+            document.getElementById(quizID+"-feedback").style.display = "flex";
+            document.getElementById(quizID+"-feedback").textContent = "You have already completed this quiz"
+        }
+
+        function claimQuizReward(quizID) {
+            fetch(`quiz-reward/${quizID}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie("csrftoken"),
+                },
+                body: JSON.stringify({action:'quiz_reward'})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);  
+                } else {
+                    alert(data.message);  
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the quiz.');
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
     </script>
 
 
     <!-- Code for Daily Bonus -->
     <script>
-        let btn = document.getElementById("claimDailyBonusBtn");
-        let lastClaimTime = localStorage.getItem("lastClaimTime");
+        document.addEventListener("DOMContentLoaded", function() {
+            let timeRemaining = "{{ time_remaining }}";
+            let btn = document.getElementById("claim-daily-bonus");
 
-        function updateButtonState() {
-            let now = Date.now();
-            let remainingTime = lastClaimTime ? 86400000 - (now - lastClaimTime) : 0; // 24 hours in ms
-
-            if (remainingTime > 0) {
-                disableButtonWithCountdown(remainingTime);
+            if (timeRemaining > 0) {
+                disableButtonWithCountdown(timeRemaining);
             } else {
                 enableButton();
             }
+        });
+
+        let btn = document.getElementById("claim-daily-bonus");
+        let timeRemaining = "{{ time_remaining }}";
+
+        if (timeRemaining > 0) {
+            disableButtonWithCountdown(timeRemaining)
         }
 
-        function claimDailyBonus() {
-            alert("Daily bonus has been claimed! 🎉");
-            localStorage.setItem("lastClaimTime", Date.now());
-            disableButtonWithCountdown(86400000); // 24-hour cooldown
+        btn.addEventListener("click", function() {
+            // AJAX request to claim the daily bonus
+            fetch("{% url 'claim_daily_bonus' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", 
+                    "X-CSRFToken": getCookie("csrftoken")  // CSRF token for security
+                },
+                body: JSON.stringify({ action: 'claim_daily_bonus' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Daily bonus claimed! 🎉");
+                    let time = 86400000
+                    disableButtonWithCountdown(time); 
+                } else {
+                    alert("You have already claimed the daily bonus!");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
+        return cookieValue;
+    }
+
 
         function disableButtonWithCountdown(timeRemaining) {
             btn.disabled = true;
 
             function updateCountdown() {
-                let now = Date.now();
-                let remaining = timeRemaining - (now - localStorage.getItem("lastClaimTime"));
-                
-                if (remaining <= 0) {
+
+                timeRemaining -= 1000;
+
+                let hours = Math.floor(timeRemaining / 3600000);
+                let minutes = Math.floor((timeRemaining % 3600000) / 60000);
+                let seconds = Math.floor((timeRemaining % 60000) / 1000);
+
+                btn.innerText = `Claim again in ${hours}h ${minutes}m ${seconds}s`;
+
+                if(timeRemaining<=0) {
                     enableButton();
                     return;
                 }
 
-                let hours = Math.floor(remaining / 3600000);
-                let minutes = Math.floor((remaining % 3600000) / 60000);
-                let seconds = Math.floor((remaining % 60000) / 1000);
-
-                btn.innerText = `Claim again in ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
-
             updateCountdown();
         }
 
         function enableButton() {
             btn.disabled = false;
             btn.innerText = "Claim Bonus";
-            localStorage.removeItem("lastClaimTime");
         }
-
-        // Run the function immediately after script loads
-        updateButtonState();
-
-        // Attach event listener to button
-        btn.addEventListener("click", claimDailyBonus);
-
     </script>
+
+
 
     <!-- Code for Registration Bonus -->
      <script>
-        window.onload = function() {
+        document.addEventListener("DOMContentLoaded", function() {
             // AJAX request to check if the registration bonus has been claimed
             fetch("{% url 'check_registration_bonus_claimed' %}")
                 .then(response => response.json())
                 .then(data => {
                     if (data.registration_bonus_claimed) {
-                        document.getElementById("registrationBonusCard").style.display = "none";
+                        document.getElementById("registration-bonus-card").style.display = "none";
                     }
                 })
                 .catch(error => {
                     console.error("Error:", error);
                 });
-        };
+        });
 
-        document.getElementById("claimRegistrationBonusBtn").addEventListener("click", function() {
+        document.getElementById("claim-registration-bonus").addEventListener("click", function() {
             // AJAX request
             fetch("{% url 'claim_registration_bonus' %}", {
                 method: "POST",
@@ -290,12 +445,12 @@
                     "Content-Type": "application/json", 
                     "X-CSRFToken": getCookie("csrftoken")  // CSRF token for security
                 },
-                body: JSON.stringify({ action: 'claim_bonus' }) 
+                body: JSON.stringify({ action: 'claim_registration_bonus' }) 
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById("registrationBonusCard").style.display = "none";
+                    document.getElementById("registration-bonus-card").style.display = "none";
                     alert("Registration bonus claimed! 🎉");
                 } else {
                     alert("You have already claimed the registration bonus!");
