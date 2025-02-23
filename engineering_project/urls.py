@@ -27,6 +27,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('logout/', LogoutView.as_view()),
     path('dashboard/', include('dashboard.urls')),
-    path('challenges/', include('challenges.urls'))
+    path('challenges/', include('challenges.urls')),
+    path('leaderboard/', include('leaderboard.urls')),
     path('map/', include('map.urls')),
 ]

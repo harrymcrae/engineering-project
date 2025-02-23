@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         :root {
-            --primary-color: #122728; /* Dark Green */
-            --secondary-color: #65B08C; /* Light Green */
+            --primary-color: #003c3c; /* Dark Green */
+            --secondary-color: white; /* Light Green */
             --text-color: black;
             --hover-color: #1E6F43;
         }
@@ -23,6 +23,7 @@
         }
         .navbar a {
             color: white !important;
+            padding: 10px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
@@ -31,9 +32,18 @@
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 80px 20px;
+            padding: 50px 20px 80px 20px;
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
+        }
+        .hero-heading {
+            font-size: 50px;
+        }
+        .feature-section-override {
+            margin: 100px 0px 0px 0px;
+        }
+        .feature-section-override-header {
+            font-size: 40px;
         }
         .features-section {
             padding: 50px 20px;
@@ -41,7 +51,7 @@
             color: white;
         }
         .feature-card {
-            background-color: var(--secondary-color);
+            background-color: #65B08C;
             padding: 20px;
             border-radius: 10px;
             border: 2px solid var(--primary-color);
@@ -81,7 +91,7 @@
     <!-- Hero Section -->
     <header class="hero">
         <div class="container">
-            <h1>Take action for a sustainable campus!</h1>
+            <h1 class="hero-heading">Take action for a sustainable campus!</h1>
             <p class="lead">Join challenges, explore the campus, and compete for rewards while making a difference.</p>
             {% if not user.is_authenticated %}
                 <a href="/accounts/register/" class="btn btn-light btn-lg">Get Started</a>
@@ -90,17 +100,37 @@
     </header>
 
     <!-- Features Section -->
-    <section class="container features-section text-center">
-        <h2>How It Works</h2>
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <a href="/challenges/" class="text-decoration-none">
-                    <div class="feature-card">
-                        <h3> Complete Challenges</h3>
-                        <p>Participate in sustaiability challenges around campus.</p>
-                    </div>
-                </a>
+    <div class="feature-section-override">
+        <section class="container features-section text-center">
+            <h2 class="feature-section-override-header">How It Works</h2>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <a href="/challenges/" class="text-decoration-none">
+                        <div class="feature-card">
+                            <h3>Complete Challenges</h3>
+                            <p>Earn points through participating in sustaiability challenges around campus</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/leaderboard/" class="text-decoration-none">
+                        <div class="feature-card">
+                            <h3>View Leaderboard</h3>
+                            <p>Climb the leaderboard to compete for rewards!</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/explore/" class="text-decoration-none">
+                        <div class="feature-card">
+                            <h3> Explore Campus</h3>
+                            <p>Use QR codes or GPS to verify the completion of the challenge.</p>
+                        </div>
+                    </a>
+                </div>
             </div>
+        </section>
+    </div>
             <div class="col-md-4">
                 <a href="/rewards/" class="text-decoration-none">
                     <div class="feature-card">

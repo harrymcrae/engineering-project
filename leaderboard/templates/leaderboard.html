@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #65B08C;
+        }
+        .header {
+            background-color: #003c3c;
+            font-size: 24px;
+            color: white;
+            padding: 20px 10px;
+        }
+        .header a {
+            padding: 10px;
+            font-size: 22px;
+            border-radius: 5px;
+        }
+        .header a:hover {
+            background-color: #65B08C;
+            transition: 0.3s;
+        }
+        .header p {
+            text-align: center;
+            font-size: 20px;
+        }
+        h1 {
+            font-weight: normal;
+            text-align: center;
+            margin: 20px 0px 0px 0px;
+        }
+        .leaderboard-section {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        table.leaderboard {
+            background-color: white;
+            color: black;
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10px;
+            box-shadow: 5px grey;
+            margin: 20px;
+        }
+        table.leaderboard th, table.leaderboard td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+        table.leaderboard tr:last-child td {
+            border-bottom: none;
+        }
+        .text-decoration-none {
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="text-decoration-none">Go back</a>
+        <h1>Leaderboard</h1>
+        <p>Earn points and climb the ranks to become the top player!</p>
+    </div>
+    <div class="leaderboard-section">
+        <table class="leaderboard">
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Points</th>
+            </tr>
+            {% for profile in user_profiles %}
+            <tr>
+                <td>{{ profile.rank }}</td>
+                <td>{{ profile.user.username }}</td>
+                <td>{{ profile.points }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
