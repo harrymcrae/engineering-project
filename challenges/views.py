@@ -24,12 +24,16 @@ def challenges_page(request):
     quizzes_completed = list(user_profile.quizzes_completed.values_list('quiz_id', flat=True))
     quizzes_completed_json = json.dumps(quizzes_completed)
 
+    challenges_completed = list(user_profile.challenges_completed.values_list('challenge_id', flat=True))
+    challenges_completed_json = json.dumps(challenges_completed)
+
     context = {
         'challenges': challenges,
         'time_remaining': time_remaining,
         'quizzes': quizzes,
         'bonuses': bonuses,
         'quizzes_completed': quizzes_completed_json,
+        'challenges_completed': challenges_completed_json,
     }
     return render(request, 'challenges.html', context)
 
@@ -45,7 +49,7 @@ def claim_daily_bonus(request):
                 })
 
 
-        profile.points += Challenge.objects.get(challenge_id='daily-bonus').points_awarded
+        profile.points += Bonus.objects.get(bonus_id='daily-bonus').points_awarded
         profile.daily_bonus_time_claimed = timezone.now()
         profile.save()
 
@@ -65,7 +69,7 @@ def claim_registration_bonus(request):
         if profile.registration_bonus_claimed:
             return JsonResponse({"success": False, "message": "You have already claimed the registration bonus!"})
 
-        profile.points += Challenge.objects.get(challenge_id='registration-bonus').points_awarded
+        profile.points += Bonus.objects.get(bonus_id='registration-bonus').points_awarded
         profile.registration_bonus_claimed = True
         profile.save()
 
@@ -102,6 +106,28 @@ def check_quiz_completed(request, quiz_id):
     quiz_completed = quiz_id in profile.quizzes_completed.values_list('quiz_id', flat=True)
 
     return JsonResponse({"quiz_completed": quiz_completed})
+
+def challenge_reward(request, challenge_id):
+    if request.method == "POST":
+        profile = request.user.profile
+        challenge = Challenge.objects.get(challenge_id=challenge_id)
+
+        if challenge in profile.challenges_completed.all():
+            return JsonResponse({"success": False, "message": "You have already completed this challenge!"})
+        
+        profile.points += challenge.points_awarded
+        profile.challenges_completed.add(challenge)
+        profile.save()
+
+        return JsonResponse({"success": True, "message": "Challenge completed! 🎉"})
+    
+    return JsonResponse({"success": False, "message": "Invalid request"})
+
+def check_challenge_completed(request, challenge_id):
+    profile = request.user.profile
+    challenge_completed = challenge_id in profile.challenges_completed.values_list('challenge_id', flat=True)
+
+    return JsonResponse({"challenge_completed": challenge_completed})
 
 
 

@@ -8,4 +8,6 @@ urlpatterns = [
     path('claim-daily-bonus/', views.claim_daily_bonus, name='claim_daily_bonus'),
     path('quiz-reward/<str:quiz_id>/', views.quiz_reward, name='quiz_reward'),
     path('check-quiz-completed/<str:quiz_id>/', views.check_quiz_completed, name='check_quiz_completed'),
+    path('challenge-reward/<str:challenge_id>/', views.challenge_reward, name='challenge_reward'),
+    path('check-challenge-completed/<str:challenge_id>/', views.check_challenge_completed, name='check_challenge_completed'),
 ]

@@ -50,12 +50,14 @@
             text-align: center;
         }
 
-        .quiz-card:hover {
+        .quiz-card:hover,
+        .challenge-card:hover {
             transform: translateY(-22%) scale(1.05);
             box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.3);
         }
         /* Modal Background */
-        .modal {
+        .modal,
+        .challenge-modal {
             display: none; /* Hidden by default */
             position: fixed;
             z-index: 1000;
@@ -90,7 +92,8 @@
         }
 
         .registration-bonus-claim-btn,
-        .daily-bonus-claim-btn {
+        .daily-bonus-claim-btn,
+        .complete-challenge-btn {
             background: var(--primary-color);
             color: white;
             border: none;
@@ -101,12 +104,14 @@
         }
 
         .registration-bonus-claim-btn:hover,
+        .complete-challenge-btn:hover,
         .daily-bonus-claim-btn:hover:not(:disabled) {
             background: darkblue;
         }
 
 
-        .daily-bonus-claim-btn:disabled {
+        .daily-bonus-claim-btn:disabled,
+        .complete-challenge-btn:disabled {
             background: gray !important; /* Override other styles */
             cursor: not-allowed;
         }
@@ -191,7 +196,7 @@
 
     <div class="challenge-container">
         {% for quiz in quizzes %}
-            <div class="quiz-card" onclick="openModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+            <div class="quiz-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
                 <h3>{{ quiz.quiz_name }}</h3>
                 <p>{{quiz.quiz_description}}</p>
             </div>
@@ -214,21 +219,34 @@
         {% endfor %}
 
         {% for challenge in challenges %}
-            <div class="challenge-card" id="{{ challenge.challenge_id }}-card">
+            <div class="challenge-card" onclick="openChallengeModal('{{ challenge.challenge_id }}')" id="{{ challenge.challenge_id }}-card">
                 <h3>{{ challenge.challenge_name }} </h3>
-                <p>{{ challenge.challenge_description }}</p>
-                <button class="{{ challenge.challenge_id }}-claim-btn" id="claim-{{ challenge.challenge_id }}">Claim Bonus</button>
+                <p>Click to view challenge!</p>
                 </div>
         {% empty %}
             <p>No challenges available.</p>
         {% endfor %}
     </div>
 
+    <!-- Challenge Modal -->
+     {% for challenge in challenges %}
+        <div id="{{ challenge.challenge_id }}-modal" class="challenge-modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
+                <h2>{{ challenge.challenge_name }}</h2>
+                <p>{{ challenge.challenge_description }}</p>
+                <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete" onclick="checkLocation('{{ challenge.challenge_id }}', '{{ challenge.latitude }}', '{{ challenge.longitude }}')">Complete Challenge</button>
+                <a href="/map/">Click here to view the challenge on the map</a>
+            </div>
+        </div>
+    {% endfor %}
+
     <!-- Quiz Modal -->
     {% for quiz in quizzes %}
         <div id="{{ quiz.quiz_id }}-modal" class="modal">
             <div class="modal-content">
-                <span class="close-btn" onclick="closeModal('{{ quiz.quiz_id }}')">&times;</span>
+                <span class="close-btn" onclick="closeQuizModal('{{ quiz.quiz_id }}')">&times;</span>
                 <h2 id="{{ quiz.quiz_id }}-title"></h2>
                 <p id="{{ quiz.quiz_id }}-question"></p>
 
@@ -246,6 +264,118 @@
             </div>
         </div>
     {% endfor %}
+
+    <!-- Code for Challenges -->
+     <script>
+        let completedChallenges = JSON.parse('{{ challenges_completed|safe }}');
+
+        document.addEventListener("DOMContentLoaded", function() {
+            completedChallenges.forEach(challengeID => {
+                fetch(`check-challenge-completed/${challengeID}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.challenge_completed) {
+                            disableChallenge(challengeID);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+            });
+        });
+
+        function openChallengeModal(challengeID) {
+            document.getElementById(challengeID +"-modal").style.display = "flex";
+        }
+
+        function closeChallengeModal(challengeID) {
+            document.getElementById(challengeID +"-modal").style.display = "none"
+        }
+
+        function disableChallenge(challengeID) {
+            document.getElementById(challengeID +"-complete").disabled = true;
+            document.getElementById(challengeID+"-feedback").style.display = "flex";
+            document.getElementById(challengeID+"-feedback").textContent = "You have already completed this challenge."
+        }
+
+        // Checks if user is near location
+        function checkLocation(challengeID, latitude, longitude) {
+            if (navigator.geolocation) {
+
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var userLatitude = position.coords.latitude;
+                    var userLongitude = position.coords.longitude;
+
+                    var distance = calculateDistance(userLatitude, userLongitude, latitude, longitude);
+
+
+                    var threshold = 1500;  // User must be within 50m
+
+                    if (distance <= threshold) {
+                        completeChallenge(challengeID);
+                        disableChallenge(challengeID);
+                        closeChallengeModal(challengeID);
+                    } else {
+                        alert("You are not at the right location for this challenge.");
+                    }
+                }, function() {
+                    alert("Geolocation not supported or permission denied.");
+                });
+            } else {
+                alert("Geolocation is not available on this device.");
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371; // Radius of the Earth in kilometers
+            var dLat = (lat2 - lat1) * Math.PI / 180;
+            var dLon = (lon2 - lon1) * Math.PI / 180;
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            var distance = R * c * 1000; // Distance in meters
+            return distance;
+        }
+
+        function completeChallenge(challengeID) {
+            fetch(`challenge-reward/${challengeID}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie("csrftoken"),
+                },
+                body: JSON.stringify({action:'challenge_reward'})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);  
+                } else {
+                    alert(data.message);  
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the challenge.');
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+     </script>
 
     <!-- Code for Quizzes -->
     <script>
@@ -266,7 +396,7 @@
             });
         });
 
-        function openModal(quizID, quizName, quizQuestion, options) {
+        function openQuizModal(quizID, quizName, quizQuestion, options) {
             document.getElementById(quizID +"-modal").style.display = "flex";
             document.getElementById(quizID +"-title").textContent = quizName;
             document.getElementById(quizID +"-question").textContent = quizQuestion;
@@ -276,7 +406,7 @@
             }
         }
         
-        function closeModal(quizID) {
+        function closeQuizModal(quizID) {
             document.getElementById(quizID +"-modal").style.display = "none";
         }
 
@@ -284,7 +414,7 @@
             if (option == correctAnswer) {
                 claimQuizReward(quizID);
                 disableButtons(quizID);
-                closeModal(quizID);
+                closeQuizModal(quizID);
             } else {
                 console.log("Incorrect");
                 document.getElementById(quizID+"-feedback").style.display = "flex";
