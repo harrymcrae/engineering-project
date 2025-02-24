@@ -13,6 +13,7 @@ def challenges_page(request):
     quizzes = Quiz.objects.all()
 
     user_profile = request.user.profile
+    time_remaining = 0
     if user_profile.daily_bonus_time_claimed:
         time_remaining = 86400000 - int(((timezone.now() - user_profile.daily_bonus_time_claimed).total_seconds())*1000)
     else:
