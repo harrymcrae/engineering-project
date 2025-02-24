@@ -37,7 +37,8 @@
         }
 
         .quiz-card,
-        .challenge-card {
+        .challenge-card,
+        .bonus-card {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             padding: 25px;
             border-radius: 12px;
@@ -197,16 +198,26 @@
         {% empty %}
             <p>No quizzes available</p>
         {% endfor %}
+            
+        {% for bonus in bonuses %}
+            <div class="bonus-card" id="{{ bonus.bonus_id }}-card">
+                <h3>{{ bonus.bonus_name }} </h3>
+                <p>{{ bonus.bonus_description }}</p>
+                {% if bonus.bonus_id == 'daily-bonus' %}
+                    <button class="daily-bonus-claim-btn" id="claim-daily-bonus">Claim Bonus</button>
+                {% else %}
+                    <button class="{{ bonus.bonus_id }}-claim-btn" id="claim-{{ bonus.bonus_id }}">Claim Bonus</button>
+                {% endif %}
+                </div>
+        {% empty %}
+            <p>No bonuses available.</p>
+        {% endfor %}
 
         {% for challenge in challenges %}
             <div class="challenge-card" id="{{ challenge.challenge_id }}-card">
                 <h3>{{ challenge.challenge_name }} </h3>
                 <p>{{ challenge.challenge_description }}</p>
-                {% if challenge.challenge_id == 'daily-bonus' %}
-                    <button class="daily-bonus-claim-btn" id="claim-daily-bonus">Claim Bonus</button>
-                {% else %}
-                    <button class="{{ challenge.challenge_id }}-claim-btn" id="claim-{{ challenge.challenge_id }}">Claim Bonus</button>
-                {% endif %}
+                <button class="{{ challenge.challenge_id }}-claim-btn" id="claim-{{ challenge.challenge_id }}">Claim Bonus</button>
                 </div>
         {% empty %}
             <p>No challenges available.</p>
