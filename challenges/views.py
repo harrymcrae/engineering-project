@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
-from .models import Challenge, Quiz
+from .models import Challenge, Quiz, Bonus
 from accounts.models import UserProfile
 import json
 
@@ -11,9 +11,11 @@ import json
 def challenges_page(request):
     challenges = Challenge.objects.all()
     quizzes = Quiz.objects.all()
+    bonuses = Bonus.objects.all()
 
     user_profile = request.user.profile
     time_remaining = 0
+
     if user_profile.daily_bonus_time_claimed:
         time_remaining = 86400000 - int(((timezone.now() - user_profile.daily_bonus_time_claimed).total_seconds())*1000)
     else:
@@ -26,6 +28,7 @@ def challenges_page(request):
         'challenges': challenges,
         'time_remaining': time_remaining,
         'quizzes': quizzes,
+        'bonuses': bonuses,
         'quizzes_completed': quizzes_completed_json,
     }
     return render(request, 'challenges.html', context)

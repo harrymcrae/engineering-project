@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Challenge, Quiz
+from .models import Challenge, Quiz, Bonus
 
 
 class ChallengeAdmin(admin.ModelAdmin):
@@ -9,3 +9,4 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 admin.site.register(Challenge, ChallengeAdmin)
 admin.site.register(Quiz)
+admin.site.register(Bonus)
