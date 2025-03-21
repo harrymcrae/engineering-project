@@ -47,9 +47,6 @@
             background-color: var(--secondary-color);
             transform: scale(1.05);
         }
-        .sidebar:hover {
-            transform: scale(1.01);
-        }
         .top_panels {
             display: flex;
             gap: 20px;
@@ -64,9 +61,7 @@
             flex: 1;
             border-radius: 5px;
             height: 340px;
-        }
-        .top_panel:hover {
-            transform: scale(1.01);
+            overflow-y: auto;
         }
         .panels {
             padding: 20px;
@@ -81,8 +76,101 @@
             margin-bottom: 20px;
             border-radius: 5px;
         }
-        .panel:hover {
-            transform: scale(1.01);
+        .completed-challenges {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px; 
+            padding: 20px; 
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background-color: #fafafa;
+            background: linear-gradient(145deg, #f9f9f9, #ececec); 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
+            transition: all 0.3s ease-in-out;
+            color: #333; 
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        .completed-challenges:hover {
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
+            border-color: #c1c1c1; 
+            background-color: #f1f1f1; 
+            background: linear-gradient(145deg, #f1f1f1, #e2e2e2); 
+        }
+        .modal,
+        .challenge-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Dark background */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal Content Box */
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        /* Close Button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .complete-challenge-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .complete-challenge-btn:disabled {
+            background: gray !important; /* Override other styles */
+            cursor: not-allowed;
+        }
+        .quiz-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .quiz-table td {
+            padding: 10px;
+        }
+
+        .quiz-option {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #ddd;
+            background-color: #f9f9f9;
+            transition: 0.3s;
+        }
+
+        .quiz-option:hover {
+            background-color: #e0e0e0;
         }
         .navbar {
             background-color: var(--primary-color) !important;
@@ -90,6 +178,7 @@
         }
         .navbar a {
             color: white !important;
+            padding: 10px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
@@ -100,7 +189,7 @@
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 30px 20px;
+            padding: 50px 20px;
             box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
@@ -114,13 +203,18 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
+            </form>
         </div>
     </nav>
 
 
     <!-- Hero -->
     <header class="hero">
-        <h3><b>Welcome Back {{ user.username }}!</b></h3>
+        <h3><b>Welcome Back, {{ user.username }}!</b></h3>
+        <h5>Points: {{ profile.points }}</h5>
     </header>
 
     <section class="container_sidebar_panels">
@@ -155,7 +249,26 @@
         <section class="panels">
             <div class="top_panels"> 
                 <div class="top_panel">
-                    <h3><b>Recently Completed Challenges</b></h3>
+                    <h3><b>Completed Challenges</b></h3>
+                    {% for challenge in challenges %}
+                        <div class="completed-challenges" onclick="openChallengeModal('{{ challenge.challenge_id }}')">
+                            <p>Challenge</p>
+                            <p>{{ challenge.challenge_name }}</p>
+                            <p>Points awarded: {{ challenge.points_awarded }}</p>
+                        </div>
+                    {% empty %}
+                        <p>No challenges completed</p>
+                    {% endfor %}
+
+                    {% for quiz in quizzes %}
+                        <div class="completed-challenges" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+                            <p>Quiz</p>
+                            <p>{{ quiz.quiz_name }}</p>
+                            <p>Points awarded: {{ quiz.points_awarded }}</p>
+                        </div>
+                    {% empty %}
+                        <p>No quizzes completed</p>
+                    {% endfor %}
                 </div>
                 <div class="top_panel">
                     <h3><b>Achievements</b></h3>
@@ -169,6 +282,84 @@
 
     </section>
 
+    <!-- Challenge Modal -->
+    {% for challenge in challenges %}
+        <div id="{{ challenge.challenge_id }}-modal" class="challenge-modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
+                <h2>{{ challenge.challenge_name }}</h2>
+                <p>{{ challenge.challenge_description }}</p>
+                <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete">Complete Challenge</button>
+                <a href="/map/">Click here to view the challenge on the map</a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- Quiz Modal -->
+    {% for quiz in quizzes %}
+        <div id="{{ quiz.quiz_id }}-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeQuizModal('{{ quiz.quiz_id }}')">&times;</span>
+                <h2 id="{{ quiz.quiz_id }}-title"></h2>
+                <p id="{{ quiz.quiz_id }}-question"></p>
+
+                <table class="quiz-table">
+                    <tr>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_one }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-1"></button></td>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_two }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-2"></button></td>
+                    </tr>
+                    <tr>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_three }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-3"></button></td>
+                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_four }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-4"></button></td>
+                    </tr>
+                </table>
+                <p id="{{ quiz.quiz_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+            </div>
+        </div>
+    {% endfor %}
+
+    <script>
+        function openChallengeModal(challengeID) {
+            document.getElementById(challengeID +"-modal").style.display = "flex";
+            disableChallenge(challengeID);
+        }
+
+        function closeChallengeModal(challengeID) {
+            document.getElementById(challengeID +"-modal").style.display = "none"
+        }
+
+        function disableChallenge(challengeID) {
+            document.getElementById(challengeID +"-complete").disabled = true;
+            document.getElementById(challengeID+"-feedback").style.display = "flex";
+            document.getElementById(challengeID+"-feedback").textContent = "You have already completed this challenge."
+        }
+
+
+        function openQuizModal(quizID, quizName, quizQuestion, options) {
+            document.getElementById(quizID +"-modal").style.display = "flex";
+            document.getElementById(quizID +"-title").textContent = quizName;
+            document.getElementById(quizID +"-question").textContent = quizQuestion;
+
+            for(let i=0;i<4;i++) {
+                document.getElementById(quizID +`-answer-${i + 1}`).innerText = options[i]
+            }
+
+            disableButtons(quizID);
+        }
+        
+        function closeQuizModal(quizID) {
+            document.getElementById(quizID +"-modal").style.display = "none";
+        }
+
+        function disableButtons(quizID) {
+            for(let i=0;i<4;i++) {
+                document.getElementById(quizID +`-answer-${i + 1}`).disabled = true;
+            }
+            document.getElementById(quizID+"-feedback").style.display = "flex";
+            document.getElementById(quizID+"-feedback").textContent = "You have already completed this quiz"
+        }
+    </script>
 
 
 </body>

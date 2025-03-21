@@ -25,10 +25,31 @@
         body h2 {
             padding: 20px;
         }
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 15px;
+        }
+        .navbar a {
+            color: white !important;
+            padding: 10px;
+        }
+        .navbar a:hover {
+            background-color: var(--hover-color);
+            transition: 0.3s;
+        }
+        .hero {
+            background: var(--primary-color);
+            color: white;
+            padding: 50px 20px 80px 20px;
+            text-align: center;
+        }
+        .hero-heading {
+            font-size: 50px;
+        }
         #map {
-            height: 600px;
+            height: 700px;
             width: 70%;
-            margin: 40px auto 20px 10%;
+            margin: 20px auto 20px auto;
             border-radius: 16px;
             box-shadow: 0 8px 16 px rgba(0, 0, 0, 0.2);
             overflow: hidden;
@@ -47,7 +68,34 @@
     </style>
 </head>
 <body>
-    <h2>Challenge Map</h2>    
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
+                        <li class="nav-item">
+                            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
+                            </form>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav> 
+
+    <!-- Hero -->
+    <header class="hero">
+        <h1 class="hero-heading">Challenge Map</h1>
+    </header>
+
     <div id="map"></div>
 
     <script>
