@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sustainability challenge</title>
+    <title>Challenges</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         :root {
@@ -48,6 +48,8 @@
             color: white;
             max-width: 300px;  /* Limit width */
             text-align: center;
+            flex: 1 1 300px;
+            box-sizing: border-box;
         }
 
         .quiz-card:hover,
@@ -118,8 +120,8 @@
 
         .challenge-container {
             display: flex;
-            flex-direction: row;
-            align-items: center;
+            flex-wrap: wrap;
+            align-items: flex-start;
             justify-content: center ;
             gap: 20px;
             padding: 20px;
@@ -156,6 +158,36 @@
 
         .quiz-option:hover {
             background-color: #e0e0e0;
+        }
+        .submission-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        .submission-form label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .file-input {
+            border: 2px solid #ddd;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .file-input:hover {
+            border-color: #007bff;
         }
 
     </style>
@@ -196,10 +228,12 @@
 
     <div class="challenge-container">
         {% for quiz in quizzes %}
-            <div class="quiz-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
-                <h3>{{ quiz.quiz_name }}</h3>
-                <p>{{quiz.quiz_description}}</p>
-            </div>
+            {% if quiz.quiz_id not in quizzes_completed %}
+                <div class="quiz-card" id="{{ quiz.quiz_id }}-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+                    <h3>{{ quiz.quiz_name }}</h3>
+                    <p>{{quiz.quiz_description}}</p>
+                </div>
+            {% endif %}
         {% empty %}
             <p>No quizzes available</p>
         {% endfor %}
@@ -219,25 +253,39 @@
         {% endfor %}
 
         {% for challenge in challenges %}
-            <div class="challenge-card" onclick="openChallengeModal('{{ challenge.challenge_id }}')" id="{{ challenge.challenge_id }}-card">
-                <h3>{{ challenge.challenge_name }} </h3>
-                <p>Click to view challenge!</p>
+            {% if challenge.challenge_id not in challenges_completed %}
+                <div class="challenge-card" id="{{ challenge.challenge_id }}-card" onclick="openChallengeModal('{{ challenge.challenge_id }}')" id="{{ challenge.challenge_id }}-card">
+                    <h3>{{ challenge.challenge_name }}</h3>
+                    <p>Click to view challenge!</p>
                 </div>
+            {% endif %}
         {% empty %}
             <p>No challenges available.</p>
         {% endfor %}
     </div>
 
     <!-- Challenge Modal -->
-     {% for challenge in challenges %}
+    {% for challenge in challenges %}
         <div id="{{ challenge.challenge_id }}-modal" class="challenge-modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
                 <h2>{{ challenge.challenge_name }}</h2>
                 <p>{{ challenge.challenge_description }}</p>
                 <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
-                <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete" onclick="checkLocation('{{ challenge.challenge_id }}', '{{ challenge.latitude }}', '{{ challenge.longitude }}')">Complete Challenge</button>
-                <a href="/map/">Click here to view the challenge on the map</a>
+                {% if challenge.latitude != 0 %}
+                    <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete" onclick="checkLocation('{{ challenge.challenge_id }}', '{{ challenge.latitude }}', '{{ challenge.longitude }}')">Complete Challenge</button>
+                    <a href="/map/">Click here to view the challenge on the map</a>
+                {% else %}
+                    <form id="submissionForm-{{ challenge.challenge_id }}" method="post" enctype="multipart/form-data" class="submission-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="challenge_id" value="{{ challenge.challenge_id }}">
+                    
+                        <label for="imageUpload-{{ challenge.challenge_id }}">Upload Proof:</label>
+                        <input type="file" id="imageUpload-{{ challenge.challenge_id }}" name="image" class="file-input">
+                    
+                        <button type="submit" id="{{ challenge.challenge_id }}-submit" class="complete-challenge-btn">Submit</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     {% endfor %}
@@ -265,9 +313,9 @@
         </div>
     {% endfor %}
 
-    <!-- Code for Challenges -->
-     <script>
-        let completedChallenges = JSON.parse('{{ challenges_completed|safe }}');
+    <!-- Code for Location Based Challenges -->
+    <script>
+        let completedChallenges = JSON.parse('{{ challenges_completed_json|safe }}');
 
         document.addEventListener("DOMContentLoaded", function() {
             completedChallenges.forEach(challengeID => {
@@ -293,9 +341,19 @@
         }
 
         function disableChallenge(challengeID) {
-            document.getElementById(challengeID +"-complete").disabled = true;
-            document.getElementById(challengeID+"-feedback").style.display = "flex";
-            document.getElementById(challengeID+"-feedback").textContent = "You have already completed this challenge."
+            document.getElementById(challengeID+"-card").style.display='none';
+
+        }
+
+        function disableSubmissionChallenge(challengeID) {
+            let submitButton = document.getElementById(challengeID+"-submit");
+            let feedbackElement = document.getElementById(`${challengeID}-feedback`);
+
+            feedbackElement.style.display = 'block';
+            feedbackElement.innerText = "You already have a pending submission. Please wait for approval.";
+            submitButton.disabled = true;
+            submitButton.innerText = "Awaiting approval";
+            document.getElementById("submissionForm-"+challengeID).style.display="none";
         }
 
         // Checks if user is near location
@@ -306,10 +364,13 @@
                     var userLatitude = position.coords.latitude;
                     var userLongitude = position.coords.longitude;
 
+                    console.log("User Coordinates:", userLatitude, userLongitude);
+                    console.log("Target Coordinates:", latitude, longitude);
+
                     var distance = calculateDistance(userLatitude, userLongitude, latitude, longitude);
 
 
-                    var threshold = 1500;  // User must be within 50m
+                    var threshold = 100;  // User must be within 100m
 
                     if (distance <= threshold) {
                         completeChallenge(challengeID);
@@ -320,7 +381,7 @@
                     }
                 }, function() {
                     alert("Geolocation not supported or permission denied.");
-                });
+                }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0});
             } else {
                 alert("Geolocation is not available on this device.");
             }
@@ -335,6 +396,7 @@
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             var distance = R * c * 1000; // Distance in meters
+            console.log(distance);
             return distance;
         }
 
@@ -375,11 +437,62 @@
             }
             return cookieValue;
         }
-     </script>
+
+        // Code for Submission Based Challenges
+        let pendingSubmissions = JSON.parse('{{ pending_submissions_json|safe }}');
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
+                let challengeID = this.querySelector("input[name='challenge_id']").value;
+
+                fetch(`check-has-submission/${challengeID}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.has_submission) {
+                            disableSubmissionChallenge(challengeID);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    let formData = new FormData(this); 
+                    let challengeID = this.querySelector("input[name='challenge_id']").value;
+
+                    if (!challengeID) {
+                        alert("Error: Challenge ID is missing!");
+                        return;
+                    }
+
+                    fetch(`submit-proof/${challengeID}/`, {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Submission successful!");
+                            closeChallengeModal(challengeID);
+                            disableSubmissionChallenge(challengeID);
+                        } else {
+                            alert("Submission failed: " + data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
 
     <!-- Code for Quizzes -->
     <script>
-        let completedQuizzes = JSON.parse('{{ quizzes_completed|safe }}');
+        let completedQuizzes = JSON.parse('{{ quizzes_completed_json|safe }}');
 
         document.addEventListener("DOMContentLoaded", function() {
             completedQuizzes.forEach(quizID => {
@@ -387,7 +500,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.quiz_completed) {
-                            disableButtons(quizID);
+                            disableQuiz(quizID);
                         }
                     })
                     .catch(error => {
@@ -413,7 +526,7 @@
         function selectOption(quizID, option, correctAnswer) {
             if (option == correctAnswer) {
                 claimQuizReward(quizID);
-                disableButtons(quizID);
+                disableQuiz(quizID);
                 closeQuizModal(quizID);
             } else {
                 console.log("Incorrect");
@@ -422,12 +535,8 @@
             }
         }
 
-        function disableButtons(quizID) {
-            for(let i=0;i<4;i++) {
-                document.getElementById(quizID +`-answer-${i + 1}`).disabled = true;
-            }
-            document.getElementById(quizID+"-feedback").style.display = "flex";
-            document.getElementById(quizID+"-feedback").textContent = "You have already completed this quiz"
+        function disableQuiz(quizID) {
+            document.getElementById(quizID+"-card").style.display='none';
         }
 
         function claimQuizReward(quizID) {
@@ -515,20 +624,20 @@
             });
         });
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
+            return cookieValue;
         }
-        return cookieValue;
-    }
 
 
         function disableButtonWithCountdown(timeRemaining) {

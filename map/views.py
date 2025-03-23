@@ -8,21 +8,25 @@ def map_view(request):
 
 def geojson_data(request):
     challengeslist = Challenge.objects.all()
+    user_profile = request.user.profile
     features = []
 
     for challenge in challengeslist:
-        features.append({
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [challenge.longitude, challenge.latitude]
-            },
-            "properties": {
-                "name": challenge.challenge_name,
-                "description": challenge.challenge_description,
-                "points": challenge.points_awarded
-            }
-        })
+        is_completed = challenge in user_profile.challenges_completed.all()
+        if not is_completed:
+            features.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [challenge.longitude, challenge.latitude]
+                },
+                "properties": {
+                    "name": challenge.challenge_name,
+                    "description": challenge.challenge_description,
+                    "points": challenge.points_awarded,
+                    "is_completed": is_completed
+                }
+            })
 
     data = {
         "type": "FeatureCollection",

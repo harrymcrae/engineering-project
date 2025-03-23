@@ -10,4 +10,6 @@ urlpatterns = [
     path('check-quiz-completed/<str:quiz_id>/', views.check_quiz_completed, name='check_quiz_completed'),
     path('challenge-reward/<str:challenge_id>/', views.challenge_reward, name='challenge_reward'),
     path('check-challenge-completed/<str:challenge_id>/', views.check_challenge_completed, name='check_challenge_completed'),
+    path('submit-proof/<str:challenge_id>/', views.submit_proof, name='submit_proof'),
+    path('check-has-submission/<str:challenge_id>/', views.check_has_submission, name='check_has_submission'),
 ]

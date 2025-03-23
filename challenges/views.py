@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
-from .models import Challenge, Quiz, Bonus
+from .models import Challenge, Quiz, Bonus, Submission
 from accounts.models import UserProfile
+from badges.models import Badge
 import json
+from .forms import SubmissionForm
 
 @login_required
 def challenges_page(request):
@@ -27,13 +29,22 @@ def challenges_page(request):
     challenges_completed = list(user_profile.challenges_completed.values_list('challenge_id', flat=True))
     challenges_completed_json = json.dumps(challenges_completed)
 
+    pending = Submission.objects.filter(user=request.user, approved=False)
+
+    pending_submissions = [submission.challenge.challenge_id for submission in pending]
+    pending_submissions_json = json.dumps(pending_submissions)
+
     context = {
         'challenges': challenges,
         'time_remaining': time_remaining,
         'quizzes': quizzes,
         'bonuses': bonuses,
-        'quizzes_completed': quizzes_completed_json,
-        'challenges_completed': challenges_completed_json,
+        'quizzes_completed': quizzes_completed,
+        'challenges_completed': challenges_completed,
+        'quizzes_completed_json': quizzes_completed_json,
+        'challenges_completed_json': challenges_completed_json,
+        'pending_submissions': pending_submissions,
+        'pending_submissions_json': pending_submissions_json,
     }
     return render(request, 'challenges.html', context)
 
@@ -89,6 +100,10 @@ def quiz_reward(request, quiz_id):
     if request.method == "POST":
         profile = request.user.profile
         quiz = Quiz.objects.get(quiz_id=quiz_id)
+        badges = profile.badges.all()
+
+        if not badges.filter(name="Einstein").exists():
+            profile.claim_badge("Einstein")
 
         if quiz in profile.quizzes_completed.all():
             return JsonResponse({"success": False, "message": "You have already completed this quiz!"})
@@ -111,6 +126,10 @@ def challenge_reward(request, challenge_id):
     if request.method == "POST":
         profile = request.user.profile
         challenge = Challenge.objects.get(challenge_id=challenge_id)
+        badges = profile.badges.all()
+
+        if not badges.filter(name="Newbie").exists():
+            profile.claim_badge("Newbie")
 
         if challenge in profile.challenges_completed.all():
             return JsonResponse({"success": False, "message": "You have already completed this challenge!"})
@@ -128,6 +147,35 @@ def check_challenge_completed(request, challenge_id):
     challenge_completed = challenge_id in profile.challenges_completed.values_list('challenge_id', flat=True)
 
     return JsonResponse({"challenge_completed": challenge_completed})
+
+def submit_proof(request, challenge_id):
+    challenge = Challenge.objects.get(challenge_id=challenge_id)
+    user = request.user
+
+    existing_submission = Submission.objects.filter(user=user, challenge=challenge, approved=False).first()
+    if existing_submission:
+        return JsonResponse({'success': False, 'error': 'You already have an unapproved submission for this challenge.'})
+
+    if request.method == "POST" and request.FILES.get("image"):
+
+        submission = Submission.objects.create(
+            user=request.user,
+            challenge=challenge,
+            image=request.FILES["image"],
+            approved=False,
+        )
+
+        return JsonResponse({"success": True, "message": "Submission received!"})
+
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
+def check_has_submission(request, challenge_id):
+    challenge = Challenge.objects.get(challenge_id=challenge_id)
+
+    has_submission = Submission.objects.filter(user=request.user, challenge=challenge, approved=False).first()
+
+    return JsonResponse({"has_submission": bool(has_submission)})
+
 
 
 
