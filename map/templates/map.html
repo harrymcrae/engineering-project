@@ -110,8 +110,12 @@
         fetch('/map/geojson-data/')  // This is a Django URL to serve GeoJSON
             .then(response => response.json())
             .then(data => {
+                console.log(data);
                 L.geoJSON(data, {
                     onEachFeature: function(feature, layer) {
+                        if (feature.properties.is_completed) { // If the user has completed the challenge, do not show the pin on the map
+                            return;
+                        }
                         var popupContent = `<h3>${feature.properties.name}</h3>
                                             <p>${feature.properties.description}</p>
                                             <p>Points: ${feature.properties.points}</p>

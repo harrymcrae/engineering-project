@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sustainability challenge</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         :root {
@@ -75,6 +75,8 @@
             background-color: white;
             margin-bottom: 20px;
             border-radius: 5px;
+            position: relative;
+            overflow-y: auto;
         }
         .completed-challenges {
             display: flex;
@@ -194,6 +196,46 @@
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
+        .badge-item {
+            display: inline-block; 
+            margin-right: 20px; 
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .badge-container {
+            position: relative; 
+        }
+
+        .badge-container img {
+            width: 100px; 
+            height: auto; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+        }
+
+        .badge-text {
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background-color: rgba(0, 0, 0, 1);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            width: 15%; 
+            margin-top: 8px; 
+            z-index: 10;
+        }
+
+        .badge-container:hover .badge-text {
+            display: block;
+        }
 
     </style>
 </head>
@@ -235,8 +277,8 @@
                     <a href="/map/">
                         <button class="btn btn-primary">Map</button>
                     </a>
-                    <a href="/rewards/">
-                        <button class="btn btn-primary">Rewards</button>
+                    <a href="/shop/">
+                        <button class="btn btn-primary">Shop</button>
                     </a>
                     <form method="POST" action="{% url 'logout' %}" style="display:inline;">
                         {% csrf_token %}
@@ -275,9 +317,29 @@
                 </div>
             </div>
             
-            <div class="panel"> 
-                <h3><b>Panel 3</b></h3>
+            <div class="panel">
+                <h3><b>Badges</b></h3>
+                {% for badge in badges %}
+                    <div class="badge-item" data-badge-id="{{ badge.name }}">
+                        <div class="badge-container">
+                            <img src="{{ badge.image.url }}" alt="{{ badge.name }} Badge">
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
+            
+            <!-- Badge Text Positioned Outside of Panel -->
+            {% for badge in badges %}
+                <div class="badge-text" id="badge-text-{{ badge.name }}">
+                    <p>{{ badge.name }}</p>
+                    <p>{{ badge.description }}</p>
+                    {% if badge.purchasable %}
+                        <p>Cost: {{ badge.price }}pts</p>
+                    {% else %}
+                        <p>Reward: {{ badge.points_awarded }}pts</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </section>
 
     </section>
@@ -291,7 +353,6 @@
                 <p>{{ challenge.challenge_description }}</p>
                 <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
                 <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete">Complete Challenge</button>
-                <a href="/map/">Click here to view the challenge on the map</a>
             </div>
         </div>
     {% endfor %}
@@ -359,6 +420,32 @@
             document.getElementById(quizID+"-feedback").style.display = "flex";
             document.getElementById(quizID+"-feedback").textContent = "You have already completed this quiz"
         }
+    </script>
+
+
+    <!-- Code for displaying the popup when hovering over badge -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const badgeItems = document.querySelectorAll('.badge-item');
+            
+            badgeItems.forEach(function(badgeItem) {
+                const badgeId = badgeItem.getAttribute('data-badge-id');
+                const badgeText = document.getElementById(`badge-text-${badgeId}`);
+                
+                badgeItem.addEventListener('mouseenter', function() {
+                    const badgeContainer = badgeItem.querySelector('.badge-container');
+                    const badgeContainerRect = badgeContainer.getBoundingClientRect();
+
+                    badgeText.style.display = 'block';
+                    badgeText.style.top = `${badgeContainerRect.bottom + window.scrollY + 8}px`; 
+                    badgeText.style.left = `${badgeContainerRect.left + badgeContainerRect.width / 2 - badgeText.offsetWidth / 2}px`;
+                });
+                
+                badgeItem.addEventListener('mouseleave', function() {
+                    badgeText.style.display = 'none';  // Hide the badge text
+                });
+            });
+        });
     </script>
 
 

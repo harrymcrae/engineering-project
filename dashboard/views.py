@@ -7,11 +7,13 @@ def dashboard_page(request):
 
     challenges = user_profile.challenges_completed.all()
     quizzes = user_profile.quizzes_completed.all()
+    badges = user_profile.badges.all()
 
     context = {
         'challenges': challenges,
         'quizzes': quizzes,
         'profile': user_profile,
+        'badges': badges
     }
 
     return render(request, 'dashboard.html', context)
