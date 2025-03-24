@@ -137,6 +137,7 @@
         <div class="container"> 
             <h1 style="font-size: 50px;">Shop</h1>
             <p class="lead">Use points to purchase exclusive badges and more!</p>
+            <p id="user-points">Points: {{ user_points }}</p>
         </div>
     </header>
 
@@ -171,6 +172,8 @@
                 if (data.success) {
                     alert(data.message);
                     document.getElementById(badge_name+"-card").style.display='none';
+                    let pointsElement = document.getElementById("user-points");
+                    pointsElement.innerText = "Points: " + data.user_points;
                 } else {
                     alert(data.message);  
                 }

@@ -9,9 +9,11 @@ def shop_page(request):
     user_profile = request.user.profile
 
     badges = Badge.objects.filter(purchasable=True).exclude(id__in=user_profile.badges.values('id')).order_by('price')
+    user_points = user_profile.points
 
     context = {
-        'badges': badges
+        'badges': badges,
+        'user_points': user_points
     }
 
     return render(request, 'shop.html', context)
@@ -29,7 +31,7 @@ def purchase_badge(request, name):
             profile.points -= badge.price
             profile.save()
 
-            return JsonResponse({"success": True, "message": "Badge purchased! 🎉"})
+            return JsonResponse({"success": True, "message": "Badge purchased! 🎉", "user_points": profile.points})
         else:
             return JsonResponse({"success": False, "message": "You do not have enough points to purchase this badge!"})
     
