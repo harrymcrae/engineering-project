@@ -271,9 +271,6 @@
                 <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
                 <h2>{{ challenge.challenge_name }}</h2>
                 <p>{{ challenge.challenge_description }}</p>
-                <img src="/media/qr_codes/challenge_{{ challenge.id }}_qr.png" alt="Scan to complete" style="max-width: 100%; margin: 10px 0;"> <!--Test-->
-                <p><small>Scan this QR code at the challenge location to complete it instantly.</small></p>
-
                 <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
                 {% if challenge.latitude != 0 %}
                     <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete" onclick="checkLocation('{{ challenge.challenge_id }}', '{{ challenge.latitude }}', '{{ challenge.longitude }}')">Complete Challenge</button>
