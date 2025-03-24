@@ -26,32 +26,75 @@
         .navbar a {
             color: white !important;
             padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
             transition: 0.3s;
+        }
+        .nav-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 0px;
+            border-radius: 5px;
+        }
+        .logo {
+            position: absolute;
+            z-index: 999;
+            top: 8%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            width: 130px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 50px;
+            background-color: transparent;
+            cursor: pointer;
         }
         .leaderboard-section {
             padding: 20px;
             display: flex;
             justify-content: center;
         }
-        table.leaderboard {
-            background-color: white;
+        table.leaderboard { /* Overall table styling */
+            background-color: #fefefe;
+            margin: 10px 20px 5px 20px;
             color: black;
-            width: 100%;
             border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             border-radius: 10px;
-            box-shadow: 5px grey;
-            margin: 20px;
+            border-spacing: 2px;
+            width: 80%;
         }
-        table.leaderboard th, table.leaderboard td {
-            padding: 10px;
+        table.leaderboard th { /* Table header styling */
+            background-color: var(--primary-color);
+            font-size: 20px;
+            color: white;
+        }
+        table.leaderboard th:first-child {
+            border-top-left-radius: 10px; /* Rounds top-left corner */
+        }
+        table.leaderboard th:last-child {
+            border-top-right-radius: 10px; /* Rounds top-right corner */
+        }
+        table.leaderboard th, table.leaderboard td { /* Table header and data cells */
+            padding: 15px 40px;
             text-align: left;
             border-bottom: 1px solid #ccc;
         }
-        table.leaderboard tr:last-child td {
+        table.leaderboard tr:last-child td { /* Last row of the table */
             border-bottom: none;
+        }
+        table.leaderboard tr:last-child td:first-child { /* Rounds bottom-left corner */
+            border-bottom-left-radius: 10px;
+        }
+        table.leaderboard tr:last-child td:last-child { /* Rounds bottom-right corner */
+            border-bottom-right-radius: 10px;
+        }
+        table.leaderboard tr:hover {
+            background-color: rgba(101, 176, 140, 0.6);
         }
         .text-decoration-none {
             color: white;
@@ -60,7 +103,7 @@
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 50px 20px 80px 20px;
+            padding: 0px 0px 40px 0px;
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
@@ -70,19 +113,26 @@
     </style>
 </head>
 <body>
+    <img src="../media/logo/logo2.png" onclick="window.location.href = '/'" alt="Logo" class="logo">
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <a class="navbar-brand" style="font-size: 20px; color: white !important; margin-left: 20px;" href="/">Exe-Plore</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                    <li class="nav-item">
-                        <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
-                        </form>
-                    </li>
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link">
+                            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-btn">Logout</button>
+                            </form>
+                        </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

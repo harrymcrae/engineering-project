@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         :root {
-            --primary-color: #122728; /* Dark Green */
+            --primary-color: #003c3c; /* Dark Green */
             --secondary-color: #65B08C; /* Light Green */
             --text-color: black;
             --hover-color: #1E6F43;
@@ -16,17 +16,66 @@
             font-family: Arial, sans-serif;
             background-color: var(--secondary-color);
             color: var(--text-color);
+            height: 100vh;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .logo {
+            position: absolute;
+            z-index: 999;
+            top: 8%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            width: 130px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 50px;
+            background-color: transparent;
+            cursor: pointer;
+        }
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 15px;
+        }
+        .navbar a {
+            color: white !important;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
+        }
+        .navbar a:hover {
+            background-color: var(--hover-color);
+            transition: 0.3s;
+        }
+        .nav-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 0px;
+            border-radius: 5px;
+        }
+        .hero {
+            background: var(--primary-color);
+            color: white;
+            padding: 0px 0px 30px 0px;
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 5px;
         }
         .container_sidebar_panels {
             display: flex;
-            height: 100vh;
         }
         .sidebar {
             background-color: white;
             padding: 40px 20px;
             border-radius: 5px;
-            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
-            height: 700px;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+            height: 660px;
             width: 300px;
             text-align: center;
             margin: left;
@@ -55,12 +104,12 @@
         }
         .top_panel {
             padding: 20px;
-            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
             background-color: white;
             margin: 0;
             flex: 1;
             border-radius: 5px;
-            height: 340px;
+            height: 320px;
             overflow-y: auto;
         }
         .panels {
@@ -70,8 +119,8 @@
         }
         .panel {
             padding: 20px;
-            height: 340px;
-            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
+            height: 320px;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
             background-color: white;
             margin-bottom: 20px;
             border-radius: 5px;
@@ -220,28 +269,6 @@
         .quiz-option:hover {
             background-color: #e0e0e0;
         }
-        .navbar {
-            background-color: var(--primary-color) !important;
-            padding: 15px;
-        }
-        .navbar a {
-            color: white !important;
-            padding: 10px;
-        }
-        .navbar a:hover {
-            background-color: var(--hover-color);
-            transition: 0.3s;
-            border-radius: 4px;
-            padding: 10px 10px;
-        }
-        .hero {
-            background: var(--primary-color);
-            color: white;
-            padding: 50px 20px;
-            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            border-bottom: 10px solid var(--secondary-color);
-        }
         .badge-item {
             display: inline-block; 
             margin-right: 20px; 
@@ -286,322 +313,333 @@
     </style>
 </head>
 <body>
-
+    <img src="../media/logo/logo2.png" onclick="window.location.href = '/'" alt="Logo" class="logo">
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
-            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
-            </form>
+            <a class="navbar-brand" style="font-size: 20px; color: white !important; margin-left: 20px;" href="/">Exe-Plore</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link">
+                            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-btn">Logout</button>
+                            </form>
+                        </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
 
-
     <!-- Hero -->
     <header class="hero">
-        <h3><b>Welcome Back, {{ user.username }}!</b></h3>
+        <h2><b>Welcome Back, {{ user.username }}!</b></h2>
         <h5>Points: {{ profile.points }}</h5>
     </header>
 
-    <section class="container_sidebar_panels">
+    <div class="content-container">
+        <section class="container_sidebar_panels">
 
-        <!-- Sidebar -->
-        <section class="sidebar">
-            <h4 class="text-black text-center">Menu</h4>
-                <div class="menu-buttons">
-                    <a href="{% url 'home' %}">
-                        <button class="btn btn-primary">Home</button>
-                    </a>
-                    <a href="/leaderboard">
-                        <button class="btn btn-primary">Leaderboard</button>
-                    </a>
-                    <a href="/challenges/">
-                        <button class="btn btn-primary">Challenges</button>
-                    </a>
-                    <a href="/map/">
-                        <button class="btn btn-primary">Map</button>
-                    </a>
-                    <a href="/shop/">
-                        <button class="btn btn-primary">Shop</button>
-                    </a>
-                    <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button class="btn btn-primary">Logout</button>
-                    </form>
-                </div>
-        </section>
+            <!-- Sidebar -->
+            <section class="sidebar">
+                <h4 class="text-black text-center"><b>Menu</b></h4>
+                    <div class="menu-buttons">
+                        <a href="{% url 'home' %}">
+                            <button class="btn btn-primary">Home</button>
+                        </a>
+                        <a href="/leaderboard">
+                            <button class="btn btn-primary">Leaderboard</button>
+                        </a>
+                        <a href="/challenges/">
+                            <button class="btn btn-primary">Challenges</button>
+                        </a>
+                        <a href="/map/">
+                            <button class="btn btn-primary">Map</button>
+                        </a>
+                        <a href="/shop/">
+                            <button class="btn btn-primary">Shop</button>
+                        </a>
+                        <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button class="btn btn-primary">Logout</button>
+                        </form>
+                    </div>
+            </section>
 
-        <!-- Panels -->
-        <section class="panels">
-            <div class="top_panels"> 
-                <div class="top_panel">
-                    <h3><b>Completed Challenges</b></h3>
-                    {% for challenge in challenges %}
-                        <div class="completed-challenges" onclick="openChallengeModal('{{ challenge.challenge_id }}')">
-                            <p>Challenge</p>
-                            <p>{{ challenge.challenge_name }}</p>
-                            <p>Points awarded: {{ challenge.points_awarded }}</p>
-                        </div>
-                    {% empty %}
-                        <p>No challenges completed</p>
-                    {% endfor %}
-
-                    {% for quiz in quizzes %}
-                        <div class="completed-challenges" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
-                            <p>Quiz</p>
-                            <p>{{ quiz.quiz_name }}</p>
-                            <p>Points awarded: {{ quiz.points_awarded }}</p>
-                        </div>
-                    {% empty %}
-                        <p>No quizzes completed</p>
-                    {% endfor %}
-                </div>
-                <div class="top_panel">
-                    <h3><b>Achievements</b></h3>
-                    <div class="achievements-container">
-                        {% for achievement in achievements %}
-                            <div class="achievement-box 
-                                        {% if achievement in completed_achievements %}completed{% else %}not-completed{% endif %}" 
-                                onclick="openAchievementModal('{{ achievement.achievement_id }}')">
-                                <p><b>{{ achievement.achievement_name }}</b></p>
-                                <p>Points: {{ achievement.points_awarded }}</p>
-                                {% if achievement.achievement_id in completed_achievements %}
-                                    <p class="status completed" style="color: green">Complete</p>
-                                {% else %}
-                                    <p class="status not-completed" style="color: red">Incomplete</p>
-                                {% endif %}
+            <!-- Panels -->
+            <section class="panels">
+                <div class="top_panels"> 
+                    <div class="top_panel">
+                        <h3 style="font-size: 24px;"><b>Completed Challenges</b></h3>
+                        {% for challenge in challenges %}
+                            <div class="completed-challenges" onclick="openChallengeModal('{{ challenge.challenge_id }}')">
+                                <p>Challenge</p>
+                                <p>{{ challenge.challenge_name }}</p>
+                                <p>Points awarded: {{ challenge.points_awarded }}</p>
                             </div>
                         {% empty %}
-                            <p>No achievements available</p>
+                            <p>No challenges completed</p>
+                        {% endfor %}
+
+                        {% for quiz in quizzes %}
+                            <div class="completed-challenges" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+                                <p>Quiz</p>
+                                <p>{{ quiz.quiz_name }}</p>
+                                <p>Points awarded: {{ quiz.points_awarded }}</p>
+                            </div>
+                        {% empty %}
+                            <p>No quizzes completed</p>
                         {% endfor %}
                     </div>
-                </div>
-            </div>
-            
-            <div class="panel">
-                <h3><b>Badges</b></h3>
-                {% for badge in badges %}
-                    <div class="badge-item" data-badge-id="{{ badge.name }}">
-                        <div class="badge-container">
-                            <img src="{{ badge.image.url }}" alt="{{ badge.name }} Badge">
+                    <div class="top_panel">
+                        <h3 style="font-size: 24px;"><b>Achievements</b></h3>
+                        <div class="achievements-container">
+                            {% for achievement in achievements %}
+                                <div class="achievement-box 
+                                            {% if achievement in completed_achievements %}completed{% else %}not-completed{% endif %}" 
+                                    onclick="openAchievementModal('{{ achievement.achievement_id }}')">
+                                    <p><b>{{ achievement.achievement_name }}</b></p>
+                                    <p>Points: {{ achievement.points_awarded }}</p>
+                                    {% if achievement.achievement_id in completed_achievements %}
+                                        <p class="status completed" style="color: green">Complete</p>
+                                    {% else %}
+                                        <p class="status not-completed" style="color: red">Incomplete</p>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <p>No achievements available</p>
+                            {% endfor %}
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-            
-            <!-- Badge Text Positioned Outside of Panel -->
-            {% for badge in badges %}
-                <div class="badge-text" id="badge-text-{{ badge.name }}">
-                    <p>{{ badge.name }}</p>
-                    <p>{{ badge.description }}</p>
-                    {% if badge.purchasable %}
-                        <p>Cost: {{ badge.price }}pts</p>
-                    {% endif %}
                 </div>
-            {% endfor %}
+                
+                <div class="panel">
+                    <h3 style="font-size: 24px;"><b>Badges</b></h3>
+                    {% for badge in badges %}
+                        <div class="badge-item" data-badge-id="{{ badge.name }}">
+                            <div class="badge-container">
+                                <img src="{{ badge.image.url }}" alt="{{ badge.name }} Badge">
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Badge Text Positioned Outside of Panel -->
+                {% for badge in badges %}
+                    <div class="badge-text" id="badge-text-{{ badge.name }}">
+                        <p>{{ badge.name }}</p>
+                        <p>{{ badge.description }}</p>
+                        {% if badge.purchasable %}
+                            <p>Cost: {{ badge.price }}pts</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </section>
+
         </section>
 
-    </section>
-
-    <!---Achievement Modal-->
-    {% for achievement in achievements %}
-        <div id="{{ achievement.achievement_id }}-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeAchievementModal('{{ achievement.achievement_id }}')">&times;</span>
-                <h2>{{ achievement.achievement_name }}</h2>
-                <p>{{ achievement.achievement_description }}</p>
-                <p><b>Points: {{ achievement.points_awarded}} </b></p>
-                <p id="{{ achievement.achievement_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
-                {% if achievement.achievement_id not in completed_achievements %}
-                    <button class="claimButton" id="{{ achievement.achievement_id }}-complete" onclick="claimAchievement('{{achievement.achievement_id}}', '{{achievement.threshold}}', '{{achievement.achievement_type}}' )">Claim</button>
-                {% else %}
-                    <p style="color: red;"><b>You have already completed this achievement!</b></p>
-                {% endif %}
+        <!---Achievement Modal-->
+        {% for achievement in achievements %}
+            <div id="{{ achievement.achievement_id }}-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closeAchievementModal('{{ achievement.achievement_id }}')">&times;</span>
+                    <h2>{{ achievement.achievement_name }}</h2>
+                    <p>{{ achievement.achievement_description }}</p>
+                    <p><b>Points: {{ achievement.points_awarded}} </b></p>
+                    <p id="{{ achievement.achievement_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                    {% if achievement.achievement_id not in completed_achievements %}
+                        <button class="claimButton" id="{{ achievement.achievement_id }}-complete" onclick="claimAchievement('{{achievement.achievement_id}}', '{{achievement.threshold}}', '{{achievement.achievement_type}}' )">Claim</button>
+                    {% else %}
+                        <p style="color: red;"><b>You have already completed this achievement!</b></p>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
-    <!-- Challenge Modal -->
-    {% for challenge in challenges %}
-        <div id="{{ challenge.challenge_id }}-modal" class="challenge-modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
-                <h2>{{ challenge.challenge_name }}</h2>
-                <p>{{ challenge.challenge_description }}</p>
-                <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
-                <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete">Complete Challenge</button>
+        <!-- Challenge Modal -->
+        {% for challenge in challenges %}
+            <div id="{{ challenge.challenge_id }}-modal" class="challenge-modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
+                    <h2>{{ challenge.challenge_name }}</h2>
+                    <p>{{ challenge.challenge_description }}</p>
+                    <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                    <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete">Complete Challenge</button>
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
-    <!-- Quiz Modal -->
-    {% for quiz in quizzes %}
-        <div id="{{ quiz.quiz_id }}-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeQuizModal('{{ quiz.quiz_id }}')">&times;</span>
-                <h2 id="{{ quiz.quiz_id }}-title"></h2>
-                <p id="{{ quiz.quiz_id }}-question"></p>
+        <!-- Quiz Modal -->
+        {% for quiz in quizzes %}
+            <div id="{{ quiz.quiz_id }}-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closeQuizModal('{{ quiz.quiz_id }}')">&times;</span>
+                    <h2 id="{{ quiz.quiz_id }}-title"></h2>
+                    <p id="{{ quiz.quiz_id }}-question"></p>
 
-                <table class="quiz-table">
-                    <tr>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_one }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-1"></button></td>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_two }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-2"></button></td>
-                    </tr>
-                    <tr>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_three }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-3"></button></td>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_four }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-4"></button></td>
-                    </tr>
-                </table>
-                <p id="{{ quiz.quiz_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                    <table class="quiz-table">
+                        <tr>
+                            <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_one }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-1"></button></td>
+                            <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_two }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-2"></button></td>
+                        </tr>
+                        <tr>
+                            <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_three }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-3"></button></td>
+                            <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_four }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-4"></button></td>
+                        </tr>
+                    </table>
+                    <p id="{{ quiz.quiz_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
-    <script>
-        var totalCompletedChallenges = Number('{{ total_completed_challenges }}');
-        var totalCompletedQuizzes = Number('{{ total_completed_quizzes }}');
-        var totalPoints = Number('{{ total_points }}')
-        var totalClaimedBadges = Number('{{ total_claimed_badges }}')
-        console.log("Total completed quizzes:" +'{{ total_completed_quizzes }}');
-        console.log("Total completed challenges:" + '{{ total_completed_challenges }}');
+        <script>
+            var totalCompletedChallenges = Number('{{ total_completed_challenges }}');
+            var totalCompletedQuizzes = Number('{{ total_completed_quizzes }}');
+            var totalPoints = Number('{{ total_points }}')
+            var totalClaimedBadges = Number('{{ total_claimed_badges }}')
+            console.log("Total completed quizzes:" +'{{ total_completed_quizzes }}');
+            console.log("Total completed challenges:" + '{{ total_completed_challenges }}');
 
-        function openAchievementModal(achievementID) {
-            document.getElementById(achievementID +"-modal").style.display = "flex";
-        }
-
-        function closeAchievementModal(achievementID) {
-            document.getElementById(achievementID +"-modal").style.display = "none"
-        }
-        function claimAchievement(achievementID, threshold, type) {
-            console.log("Type", type);
-            console.log("Threshold", threshold);
-            if (type === "totalc" && totalCompletedChallenges < threshold) {
-                alert(`You need to complete ${threshold} challenges to claim this achievement.`);
-                return;
-            }
-            else if (type === "totalq" && totalCompletedQuizzes < threshold) {
-                alert(`You need to complete ${threshold} quizzes to claim this achievement.`);
-                return;
-            }
-            else if (type === "totalp" && totalPoints < threshold) {
-                alert(`You need ${threshold} points to claim this achievement.`);
-                return;
-            }
-            else if (type === "totalb" && totalClaimedBadges < threshold) {
-                alert(`You need ${threshold} badges to claim this achievement.`);
-                return;
+            function openAchievementModal(achievementID) {
+                document.getElementById(achievementID +"-modal").style.display = "flex";
             }
 
-            fetch(`achievement-reward/${achievementID}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie("csrftoken"),
-                },
-                body: JSON.stringify({action:'achievement_reward'})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message); 
-                    window.location.reload(); 
-                } else {
-                    alert(data.message);  
+            function closeAchievementModal(achievementID) {
+                document.getElementById(achievementID +"-modal").style.display = "none"
+            }
+            function claimAchievement(achievementID, threshold, type) {
+                console.log("Type", type);
+                console.log("Threshold", threshold);
+                if (type === "totalc" && totalCompletedChallenges < threshold) {
+                    alert(`You need to complete ${threshold} challenges to claim this achievement.`);
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the achievement.');
-            });
-        }
+                else if (type === "totalq" && totalCompletedQuizzes < threshold) {
+                    alert(`You need to complete ${threshold} quizzes to claim this achievement.`);
+                    return;
+                }
+                else if (type === "totalp" && totalPoints < threshold) {
+                    alert(`You need ${threshold} points to claim this achievement.`);
+                    return;
+                }
+                else if (type === "totalb" && totalClaimedBadges < threshold) {
+                    alert(`You need ${threshold} badges to claim this achievement.`);
+                    return;
+                }
 
-        // Run achievement check on page load
-        document.addEventListener("DOMContentLoaded", checkAchievements);
+                fetch(`achievement-reward/${achievementID}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify({action:'achievement_reward'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message); 
+                        window.location.reload(); 
+                    } else {
+                        alert(data.message);  
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing the achievement.');
+                });
+            }
 
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+            // Run achievement check on page load
+            document.addEventListener("DOMContentLoaded", checkAchievements);
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
                     }
                 }
-            }
-            return cookieValue;
-        }
-
-        function openChallengeModal(challengeID) {
-            document.getElementById(challengeID +"-modal").style.display = "flex";
-            disableChallenge(challengeID);
-        }
-
-        function closeChallengeModal(challengeID) {
-            document.getElementById(challengeID +"-modal").style.display = "none"
-        }
-
-        function disableChallenge(challengeID) {
-            document.getElementById(challengeID +"-complete").disabled = true;
-            document.getElementById(challengeID+"-feedback").style.display = "flex";
-            document.getElementById(challengeID+"-feedback").textContent = "You have already completed this challenge."
-        }
-
-
-        function openQuizModal(quizID, quizName, quizQuestion, options) {
-            document.getElementById(quizID +"-modal").style.display = "flex";
-            document.getElementById(quizID +"-title").textContent = quizName;
-            document.getElementById(quizID +"-question").textContent = quizQuestion;
-
-            for(let i=0;i<4;i++) {
-                document.getElementById(quizID +`-answer-${i + 1}`).innerText = options[i]
+                return cookieValue;
             }
 
-            disableButtons(quizID);
-        }
-        
-        function closeQuizModal(quizID) {
-            document.getElementById(quizID +"-modal").style.display = "none";
-        }
-
-        function disableButtons(quizID) {
-            for(let i=0;i<4;i++) {
-                document.getElementById(quizID +`-answer-${i + 1}`).disabled = true;
+            function openChallengeModal(challengeID) {
+                document.getElementById(challengeID +"-modal").style.display = "flex";
+                disableChallenge(challengeID);
             }
-            document.getElementById(quizID+"-feedback").style.display = "flex";
-            document.getElementById(quizID+"-feedback").textContent = "You have already completed this quiz"
-        }
-    </script>
+
+            function closeChallengeModal(challengeID) {
+                document.getElementById(challengeID +"-modal").style.display = "none"
+            }
+
+            function disableChallenge(challengeID) {
+                document.getElementById(challengeID +"-complete").disabled = true;
+                document.getElementById(challengeID+"-feedback").style.display = "flex";
+                document.getElementById(challengeID+"-feedback").textContent = "You have already completed this challenge."
+            }
 
 
-    <!-- Code for displaying the popup when hovering over badge -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const badgeItems = document.querySelectorAll('.badge-item');
+            function openQuizModal(quizID, quizName, quizQuestion, options) {
+                document.getElementById(quizID +"-modal").style.display = "flex";
+                document.getElementById(quizID +"-title").textContent = quizName;
+                document.getElementById(quizID +"-question").textContent = quizQuestion;
+
+                for(let i=0;i<4;i++) {
+                    document.getElementById(quizID +`-answer-${i + 1}`).innerText = options[i]
+                }
+
+                disableButtons(quizID);
+            }
             
-            badgeItems.forEach(function(badgeItem) {
-                const badgeId = badgeItem.getAttribute('data-badge-id');
-                const badgeText = document.getElementById(`badge-text-${badgeId}`);
-                
-                badgeItem.addEventListener('mouseenter', function() {
-                    const badgeContainer = badgeItem.querySelector('.badge-container');
-                    const badgeContainerRect = badgeContainer.getBoundingClientRect();
+            function closeQuizModal(quizID) {
+                document.getElementById(quizID +"-modal").style.display = "none";
+            }
 
-                    badgeText.style.display = 'block';
-                    badgeText.style.top = `${badgeContainerRect.bottom + window.scrollY + 8}px`; 
-                    badgeText.style.left = `${badgeContainerRect.left + badgeContainerRect.width / 2 - badgeText.offsetWidth / 2}px`;
-                });
+            function disableButtons(quizID) {
+                for(let i=0;i<4;i++) {
+                    document.getElementById(quizID +`-answer-${i + 1}`).disabled = true;
+                }
+                document.getElementById(quizID+"-feedback").style.display = "flex";
+                document.getElementById(quizID+"-feedback").textContent = "You have already completed this quiz"
+            }
+        </script>
+
+        <!-- Code for displaying the popup when hovering over badge -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const badgeItems = document.querySelectorAll('.badge-item');
                 
-                badgeItem.addEventListener('mouseleave', function() {
-                    badgeText.style.display = 'none';  // Hide the badge text
+                badgeItems.forEach(function(badgeItem) {
+                    const badgeId = badgeItem.getAttribute('data-badge-id');
+                    const badgeText = document.getElementById(`badge-text-${badgeId}`);
+                    
+                    badgeItem.addEventListener('mouseenter', function() {
+                        const badgeContainer = badgeItem.querySelector('.badge-container');
+                        const badgeContainerRect = badgeContainer.getBoundingClientRect();
+
+                        badgeText.style.display = 'block';
+                        badgeText.style.top = `${badgeContainerRect.bottom + window.scrollY + 8}px`; 
+                        badgeText.style.left = `${badgeContainerRect.left + badgeContainerRect.width / 2 - badgeText.offsetWidth / 2}px`;
+                    });
+                    
+                    badgeItem.addEventListener('mouseleave', function() {
+                        badgeText.style.display = 'none';  // Hide the badge text
+                    });
                 });
             });
-        });
-    </script>
-
-
+        </script>
+    </div>
 </body>
 </html>

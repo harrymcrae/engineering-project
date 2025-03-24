@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Challenges</title>
+    <title>Sustainability challenge</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         :root {
@@ -36,9 +36,9 @@
             border-bottom: 10px solid var(--secondary-color);
         }
 
-        .quiz-card,
-        .challenge-card,
-        .bonus-card {
+        .daily-quiz-card,
+        .daily-bonus-card,
+        .registration-bonus-card {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             padding: 25px;
             border-radius: 12px;
@@ -48,18 +48,14 @@
             color: white;
             max-width: 300px;  /* Limit width */
             text-align: center;
-            flex: 1 1 300px;
-            box-sizing: border-box;
         }
 
-        .quiz-card:hover,
-        .challenge-card:hover {
+        .daily-quiz-card:hover {
             transform: translateY(-22%) scale(1.05);
             box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.3);
         }
         /* Modal Background */
-        .modal,
-        .challenge-modal {
+        .modal {
             display: none; /* Hidden by default */
             position: fixed;
             z-index: 1000;
@@ -94,8 +90,7 @@
         }
 
         .registration-bonus-claim-btn,
-        .daily-bonus-claim-btn,
-        .complete-challenge-btn {
+        .daily-bonus-claim-btn {
             background: var(--primary-color);
             color: white;
             border: none;
@@ -106,22 +101,20 @@
         }
 
         .registration-bonus-claim-btn:hover,
-        .complete-challenge-btn:hover,
         .daily-bonus-claim-btn:hover:not(:disabled) {
             background: darkblue;
         }
 
 
-        .daily-bonus-claim-btn:disabled,
-        .complete-challenge-btn:disabled {
+        .daily-bonus-claim-btn:disabled {
             background: gray !important; /* Override other styles */
             cursor: not-allowed;
         }
 
         .challenge-container {
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
+            flex-direction: row;
+            align-items: center;
             justify-content: center ;
             gap: 20px;
             padding: 20px;
@@ -133,61 +126,6 @@
                 flex-direction: row;
                 justify-content: center;
             }
-        }
-
-        .quiz-table {
-            width: 100%;
-            margin-top: 10px;
-            border-collapse: collapse;
-            text-align: center;
-        }
-
-        .quiz-table td {
-            padding: 10px;
-        }
-
-        .quiz-option {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            border: 2px solid #ddd;
-            background-color: #f9f9f9;
-            transition: 0.3s;
-        }
-
-        .quiz-option:hover {
-            background-color: #e0e0e0;
-        }
-        .submission-form {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-            margin: auto;
-        }
-
-        .submission-form label {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .file-input {
-            border: 2px solid #ddd;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            background: white;
-            transition: border-color 0.3s ease;
-        }
-
-        .file-input:hover {
-            border-color: #007bff;
         }
 
     </style>
@@ -227,470 +165,124 @@
     </header>
 
     <div class="challenge-container">
-        {% for bonus in bonuses %}
-            <div class="bonus-card" id="{{ bonus.bonus_id }}-card">
-                <h3>{{ bonus.bonus_name }} </h3>
-                <p>{{ bonus.bonus_description }}</p>
-                {% if bonus.bonus_id == 'daily-bonus' %}
-                    <button class="daily-bonus-claim-btn" id="claim-daily-bonus">Claim Bonus</button>
-                {% else %}
-                    <button class="{{ bonus.bonus_id }}-claim-btn" id="claim-{{ bonus.bonus_id }}">Claim Bonus</button>
-                {% endif %}
-                <p>{{ bonus.points_awarded }} pts</p>
-                </div>
-        {% empty %}
-            <p>No bonuses available.</p>
-        {% endfor %}
+        <!-- Daily Quiz Section -->
+        <div class="daily-quiz-card" onclick="openModal()" >
+            <h3>Daily Quiz 🔥</h3>
+            <p>Click to view the daily quiz!</p>
+        </div>
 
-        {% for quiz in quizzes %}
-            {% if quiz.quiz_id not in quizzes_completed %}
-                <div class="quiz-card" id="{{ quiz.quiz_id }}-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
-                    <h3>{{ quiz.quiz_name }}</h3>
-                    <p>{{quiz.quiz_description}}</p>
-                    <p>{{ quiz.points_awarded }} pts</p>
-                </div>
-            {% endif %}
-        {% empty %}
-            <p>No quizzes available</p>
-        {% endfor %}
+        <!-- Daily Bonus Section -->
+        <div class="daily-bonus-card">
+            <h3>Daily Bonus ⏰</h3>
+            <p>Claim your free daily bonus!</p>
+            <button class="daily-bonus-claim-btn" id="claimDailyBonusBtn" onmousedown="claimDailyBonus()">Claim Bonus</button>
+        </div>
 
-        {% for challenge in challenges %}
-            {% if challenge.challenge_id not in challenges_completed %}
-                <div class="challenge-card" id="{{ challenge.challenge_id }}-card" onclick="openChallengeModal('{{ challenge.challenge_id }}')" id="{{ challenge.challenge_id }}-card">
-                    <h3>{{ challenge.challenge_name }}</h3>
-                    <p>Click to view challenge!</p>
-                    <p>{{ challenge.points_awarded }} pts</p>
-                </div>
-            {% endif %}
-        {% empty %}
-            <p>No challenges available.</p>
-        {% endfor %}
+        <!-- Registration Bonus Section -->
+        <div class="registration-bonus-card" id="registrationBonusCard">
+            <h3>Registration Bonus 📝</h3>
+            <p>Claim one-time registration bonus!</p>
+            <button class="registration-bonus-claim-btn" id="claimRegistrationBonusBtn">Claim Bonus</button>
+        </div>
     </div>
 
-    <!-- Challenge Modal -->
-    {% for challenge in challenges %}
-        <div id="{{ challenge.challenge_id }}-modal" class="challenge-modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
-                <h2>{{ challenge.challenge_name }}</h2>
-                <p>{{ challenge.challenge_description }}</p>
-                <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
-                {% if challenge.latitude != 0 %}
-                    <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete" onclick="checkLocation('{{ challenge.challenge_id }}', '{{ challenge.latitude }}', '{{ challenge.longitude }}')">Complete Challenge</button>
-                    <a href="/map/">Click here to view the challenge on the map</a>
-                {% else %}
-                    <form id="submissionForm-{{ challenge.challenge_id }}" method="post" enctype="multipart/form-data" class="submission-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="challenge_id" value="{{ challenge.challenge_id }}">
-                    
-                        <label for="imageUpload-{{ challenge.challenge_id }}">Upload Proof:</label>
-                        <input type="file" id="imageUpload-{{ challenge.challenge_id }}" name="image" class="file-input">
-                    
-                        <button type="submit" id="{{ challenge.challenge_id }}-submit" class="complete-challenge-btn">Submit</button>
-                    </form>
-                {% endif %}
-            </div>
+
+    <!-- Daily Quiz Model -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2>Daily Quiz</h2>
+            <p>Daily quiz will appear here!</p>
         </div>
-    {% endfor %}
+    </div>
 
-    <!-- Quiz Modal -->
-    {% for quiz in quizzes %}
-        <div id="{{ quiz.quiz_id }}-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeQuizModal('{{ quiz.quiz_id }}')">&times;</span>
-                <h2 id="{{ quiz.quiz_id }}-title"></h2>
-                <p id="{{ quiz.quiz_id }}-question"></p>
-
-                <table class="quiz-table">
-                    <tr>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_one }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-1"></button></td>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_two }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-2"></button></td>
-                    </tr>
-                    <tr>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_three }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-3"></button></td>
-                        <td><button class="quiz-option" onclick="selectOption('{{ quiz.quiz_id }}','{{ quiz.quiz_option_four }}','{{ quiz.quiz_answer }}')" id="{{ quiz.quiz_id }}-answer-4"></button></td>
-                    </tr>
-                </table>
-                <p id="{{ quiz.quiz_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
-            </div>
-        </div>
-    {% endfor %}
-
-    <!-- Code for Location Based Challenges -->
     <script>
-        let completedChallenges = JSON.parse('{{ challenges_completed_json|safe }}');
-
-        document.addEventListener("DOMContentLoaded", function() {
-            completedChallenges.forEach(challengeID => {
-                fetch(`check-challenge-completed/${challengeID}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.challenge_completed) {
-                            disableChallenge(challengeID);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
-            });
-        });
-
-        function openChallengeModal(challengeID) {
-            document.getElementById(challengeID +"-modal").style.display = "flex";
-        }
-
-        function closeChallengeModal(challengeID) {
-            document.getElementById(challengeID +"-modal").style.display = "none"
-        }
-
-        function disableChallenge(challengeID) {
-            document.getElementById(challengeID+"-card").style.display='none';
-
-        }
-
-        function disableSubmissionChallenge(challengeID) {
-            let submitButton = document.getElementById(challengeID+"-submit");
-            let feedbackElement = document.getElementById(`${challengeID}-feedback`);
-
-            feedbackElement.style.display = 'block';
-            feedbackElement.innerText = "You already have a pending submission. Please wait for approval.";
-            submitButton.disabled = true;
-            submitButton.innerText = "Awaiting approval";
-            document.getElementById("submissionForm-"+challengeID).style.display="none";
-        }
-
-        // Checks if user is near location
-        function checkLocation(challengeID, latitude, longitude) {
-            if (navigator.geolocation) {
-
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var userLatitude = position.coords.latitude;
-                    var userLongitude = position.coords.longitude;
-
-                    console.log("User Coordinates:", userLatitude, userLongitude);
-                    console.log("Target Coordinates:", latitude, longitude);
-
-                    var distance = calculateDistance(userLatitude, userLongitude, latitude, longitude);
-
-
-                    var threshold = 100;  // User must be within 100m
-
-                    if (distance <= threshold) {
-                        completeChallenge(challengeID);
-                        disableChallenge(challengeID);
-                        closeChallengeModal(challengeID);
-                    } else {
-                        alert("You are not at the right location for this challenge.");
-                    }
-                }, function() {
-                    alert("Geolocation not supported or permission denied.");
-                }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0});
-            } else {
-                alert("Geolocation is not available on this device.");
-            }
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371; // Radius of the Earth in kilometers
-            var dLat = (lat2 - lat1) * Math.PI / 180;
-            var dLon = (lon2 - lon1) * Math.PI / 180;
-            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            var distance = R * c * 1000; // Distance in meters
-            console.log(distance);
-            return distance;
-        }
-
-        function completeChallenge(challengeID) {
-            fetch(`challenge-reward/${challengeID}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie("csrftoken"),
-                },
-                body: JSON.stringify({action:'challenge_reward'})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);  
-                } else {
-                    alert(data.message);  
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the challenge.');
-            });
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Code for Submission Based Challenges
-        let pendingSubmissions = JSON.parse('{{ pending_submissions_json|safe }}');
-
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
-                let challengeID = form.querySelector("input[name='challenge_id']").value;
-
-                fetch(`check-has-submission/${challengeID}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.has_submission) {
-                            disableSubmissionChallenge(challengeID);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
-
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
-
-                    let formData = new FormData(this);
-                    let challengeID = this.querySelector("input[name='challenge_id']").value;
-
-                    if (!challengeID) {
-                        alert("Error: Challenge ID is missing!");
-                        return;
-                    }
-
-                    fetch(`submit-proof/${challengeID}/`, {
-                        method: "POST",
-                        body: formData,
-                        headers: {
-                            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Submission successful!");
-                            closeChallengeModal(challengeID);
-                            disableSubmissionChallenge(challengeID);
-                        } else {
-                            alert("Submission failed: " + data.error);
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-                });
-            });
-        });
-    </script>
-
-    <!-- Code for Quizzes -->
-    <script>
-        let completedQuizzes = JSON.parse('{{ quizzes_completed_json|safe }}');
-
-        document.addEventListener("DOMContentLoaded", function() {
-            completedQuizzes.forEach(quizID => {
-                fetch(`check-quiz-completed/${quizID}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.quiz_completed) {
-                            disableQuiz(quizID);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
-            });
-        });
-
-        function openQuizModal(quizID, quizName, quizQuestion, options) {
-            document.getElementById(quizID +"-modal").style.display = "flex";
-            document.getElementById(quizID +"-title").textContent = quizName;
-            document.getElementById(quizID +"-question").textContent = quizQuestion;
-
-            for(let i=0;i<4;i++) {
-                document.getElementById(quizID +`-answer-${i + 1}`).innerText = options[i]
-            }
+        function openModal() {
+            document.getElementById("quizModal").style.display = "flex";
         }
         
-        function closeQuizModal(quizID) {
-            document.getElementById(quizID +"-modal").style.display = "none";
-        }
-
-        function selectOption(quizID, option, correctAnswer) {
-            if (option == correctAnswer) {
-                claimQuizReward(quizID);
-                disableQuiz(quizID);
-                closeQuizModal(quizID);
-            } else {
-                console.log("Incorrect");
-                document.getElementById(quizID+"-feedback").style.display = "flex";
-                document.getElementById(quizID+"-feedback").textContent = "Incorrect!"
-            }
-        }
-
-        function disableQuiz(quizID) {
-            document.getElementById(quizID+"-card").style.display='none';
-        }
-
-        function claimQuizReward(quizID) {
-            fetch(`quiz-reward/${quizID}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie("csrftoken"),
-                },
-                body: JSON.stringify({action:'quiz_reward'})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);  
-                } else {
-                    alert(data.message);  
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the quiz.');
-            });
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+        function closeModal() {
+            document.getElementById("quizModal").style.display = "none";
         }
     </script>
 
 
     <!-- Code for Daily Bonus -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let timeRemaining = "{{ time_remaining }}";
-            let btn = document.getElementById("claim-daily-bonus");
+        let btn = document.getElementById("claimDailyBonusBtn");
+        let lastClaimTime = localStorage.getItem("lastClaimTime");
 
-            if (timeRemaining > 0) {
-                disableButtonWithCountdown(timeRemaining);
+        function updateButtonState() {
+            let now = Date.now();
+            let remainingTime = lastClaimTime ? 86400000 - (now - lastClaimTime) : 0; // 24 hours in ms
+
+            if (remainingTime > 0) {
+                disableButtonWithCountdown(remainingTime);
             } else {
                 enableButton();
             }
-        });
-
-        let btn = document.getElementById("claim-daily-bonus");
-        let timeRemaining = "{{ time_remaining }}";
-
-        if (timeRemaining > 0) {
-            disableButtonWithCountdown(timeRemaining)
         }
 
-        btn.addEventListener("click", function() {
-            // AJAX request to claim the daily bonus
-            fetch("{% url 'claim_daily_bonus' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json", 
-                    "X-CSRFToken": getCookie("csrftoken")  // CSRF token for security
-                },
-                body: JSON.stringify({ action: 'claim_daily_bonus' })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Daily bonus claimed! 🎉");
-                    let time = 86400000
-                    disableButtonWithCountdown(time); 
-                } else {
-                    alert("You have already claimed the daily bonus!");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        });
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
+        function claimDailyBonus() {
+            alert("Daily bonus has been claimed! 🎉");
+            localStorage.setItem("lastClaimTime", Date.now());
+            disableButtonWithCountdown(86400000); // 24-hour cooldown
         }
-
 
         function disableButtonWithCountdown(timeRemaining) {
             btn.disabled = true;
 
             function updateCountdown() {
-
-                timeRemaining -= 1000;
-
-                let hours = Math.floor(timeRemaining / 3600000);
-                let minutes = Math.floor((timeRemaining % 3600000) / 60000);
-                let seconds = Math.floor((timeRemaining % 60000) / 1000);
-
-                btn.innerText = `Claim again in ${hours}h ${minutes}m ${seconds}s`;
-
-                if(timeRemaining<=0) {
+                let now = Date.now();
+                let remaining = timeRemaining - (now - localStorage.getItem("lastClaimTime"));
+                
+                if (remaining <= 0) {
                     enableButton();
                     return;
                 }
 
+                let hours = Math.floor(remaining / 3600000);
+                let minutes = Math.floor((remaining % 3600000) / 60000);
+                let seconds = Math.floor((remaining % 60000) / 1000);
+
+                btn.innerText = `Claim again in ${hours}h ${minutes}m ${seconds}s`;
                 setTimeout(updateCountdown, 1000);
             }
+
             updateCountdown();
         }
 
         function enableButton() {
             btn.disabled = false;
             btn.innerText = "Claim Bonus";
+            localStorage.removeItem("lastClaimTime");
         }
+
+        // Run the function immediately after script loads
+        updateButtonState();
+
+        // Attach event listener to button
+        btn.addEventListener("click", claimDailyBonus);
+
     </script>
-
-
 
     <!-- Code for Registration Bonus -->
      <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        window.onload = function() {
             // AJAX request to check if the registration bonus has been claimed
             fetch("{% url 'check_registration_bonus_claimed' %}")
                 .then(response => response.json())
                 .then(data => {
                     if (data.registration_bonus_claimed) {
-                        document.getElementById("registration-bonus-card").style.display = "none";
+                        document.getElementById("registrationBonusCard").style.display = "none";
                     }
                 })
                 .catch(error => {
                     console.error("Error:", error);
                 });
-        });
+        };
 
-        document.getElementById("claim-registration-bonus").addEventListener("click", function() {
+        document.getElementById("claimRegistrationBonusBtn").addEventListener("click", function() {
             // AJAX request
             fetch("{% url 'claim_registration_bonus' %}", {
                 method: "POST",
@@ -698,12 +290,12 @@
                     "Content-Type": "application/json", 
                     "X-CSRFToken": getCookie("csrftoken")  // CSRF token for security
                 },
-                body: JSON.stringify({ action: 'claim_registration_bonus' }) 
+                body: JSON.stringify({ action: 'claim_bonus' }) 
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById("registration-bonus-card").style.display = "none";
+                    document.getElementById("registrationBonusCard").style.display = "none";
                     alert("Registration bonus claimed! 🎉");
                 } else {
                     alert("You have already claimed the registration bonus!");

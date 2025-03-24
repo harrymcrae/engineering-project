@@ -26,15 +26,36 @@
         .navbar a {
             color: white !important;
             padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
             transition: 0.3s;
         }
+        .nav-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 0px;
+            border-radius: 5px;
+        }
+        .logo {
+            position: absolute;
+            z-index: 999;
+            top: 8%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            width: 130px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 50px;
+            background-color: transparent;
+            cursor: pointer;
+        }
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 50px 20px 80px 20px;
+            padding: 0px 20px 40px 20px;
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
@@ -86,19 +107,26 @@
     </style>
 </head>
 <body>
+    <img src="../media/logo/logo2.png" onclick="window.location.href = '/'" alt="Logo" class="logo">
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <a class="navbar-brand" style="font-size: 20px; color: white !important; margin-left: 20px;" href="/">Exe-Plore</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                    <li class="nav-item">
-                        <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
-                        </form>
-                    </li>
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link">
+                            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-btn">Logout</button>
+                            </form>
+                        </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -107,7 +135,7 @@
     <!-- Hero Section -->
     <header class="hero">
         <div class="container"> 
-            <h1 class="hero-heading">Shop</h1>
+            <h1 style="font-size: 50px;">Shop</h1>
             <p class="lead">Use points to purchase exclusive badges and more!</p>
         </div>
     </header>
