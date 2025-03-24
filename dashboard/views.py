@@ -51,12 +51,14 @@ def achievement_reward(request, achievement_id):
     if request.method == "POST":
         profile = request.user.profile
         achievement = Achievement.objects.get(achievement_id=achievement_id)
+        badge = achievement.badge_awarded
 
         if achievement in profile.completed_achievements.all():
             return JsonResponse({"success": False, "message": "You have already completed this achievement!"})
         
         profile.points += achievement.points_awarded
         profile.completed_achievements.add(achievement)
+        profile.badges.add(badge)
         profile.save()
 
         return JsonResponse({"success": True, "message": "Achievement completed! 🎉"})

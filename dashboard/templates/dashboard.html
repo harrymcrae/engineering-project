@@ -367,10 +367,10 @@
                                 onclick="openAchievementModal('{{ achievement.achievement_id }}')">
                                 <p><b>{{ achievement.achievement_name }}</b></p>
                                 <p>Points: {{ achievement.points_awarded }}</p>
-                                {% if achievement in completed_achievements %}
-                                    <p class="status completed"></p>
+                                {% if achievement.achievement_id in completed_achievements %}
+                                    <p class="status completed" style="color: green">Complete</p>
                                 {% else %}
-                                    <p class="status not-completed"></p>
+                                    <p class="status not-completed" style="color: red">Incomplete</p>
                                 {% endif %}
                             </div>
                         {% empty %}
@@ -398,8 +398,6 @@
                     <p>{{ badge.description }}</p>
                     {% if badge.purchasable %}
                         <p>Cost: {{ badge.price }}pts</p>
-                    {% else %}
-                        <p>Reward: {{ badge.points_awarded }}pts</p>
                     {% endif %}
                 </div>
             {% endfor %}

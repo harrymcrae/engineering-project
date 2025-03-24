@@ -4,4 +4,4 @@ from .models import UserProfile
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'points') 
-    filter_horizontal = ('quizzes_completed', 'challenges_completed', 'badges')
+    filter_horizontal = ('quizzes_completed', 'challenges_completed', 'badges', 'completed_achievements')

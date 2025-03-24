@@ -30,18 +30,10 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
-    def claim_badge(self, badge_name):
-        badge = Badge.objects.get(name=badge_name)
-        self.points += badge.points_awarded
-        self.badges.add(badge)
-        self.save()
-
-
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         user_profile = UserProfile.objects.create(user=instance)
-        user_profile.claim_badge("First Timer")
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
