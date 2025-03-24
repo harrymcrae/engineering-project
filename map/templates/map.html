@@ -11,7 +11,7 @@
     <style>    
 
         :root {
-            --primary-color: #122728; /* Dark Green */
+            --primary-color: #003c3c; /* Dark Green */
             --secondary-color: #65B08C; /* Light Green */
             --text-color: white;
             --hover-color: #1E6F43;
@@ -20,7 +20,6 @@
             font-family: Arial, sans-serif;
             background-color: var(--primary-color);
             color: var(--text-color);
-
         }
         body h2 {
             padding: 20px;
@@ -32,24 +31,45 @@
         .navbar a {
             color: white !important;
             padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
             transition: 0.3s;
         }
+        .nav-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 0px;
+            border-radius: 5px;
+        }
+        .logo {
+            position: absolute;
+            z-index: 999;
+            top: 8%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            width: 130px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 50px;
+            background-color: transparent;
+            cursor: pointer;
+        }
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 50px 20px 80px 20px;
+            padding: 0px 20px 10px 20px;
             text-align: center;
         }
         .hero-heading {
             font-size: 50px;
         }
         #map {
-            height: 700px;
-            width: 70%;
-            margin: 20px auto 20px auto;
+            height: 650px;
+            width: 65%;
+            margin: 5px auto 20px auto;
             border-radius: 16px;
             box-shadow: 0 8px 16 px rgba(0, 0, 0, 0.2);
             overflow: hidden;
@@ -68,10 +88,11 @@
     </style>
 </head>
 <body>
+    <img src="../media/logo/logo2.png" onclick="window.location.href = '/'" alt="Logo" class="logo">
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <a class="navbar-brand" style="font-size: 20px; color: white !important; margin-left: 20px;" href="/">Exe-Plore</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if not user.is_authenticated %}
@@ -79,21 +100,23 @@
                         <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                        <li class="nav-item">
+                        <li class="nav-item"><a class="nav-link">
                             <form method="POST" action="{% url 'logout' %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
+                                <button type="submit" class="nav-btn">Logout</button>
                             </form>
+                        </a>
                         </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
-    </nav> 
+    </nav>
 
     <!-- Hero -->
     <header class="hero">
-        <h1 class="hero-heading">Challenge Map</h1>
+        <h1>Challenge Map</h1>
+        <p style="font-size: 20px;">Exe-Plore the map and find the hidden challenges</p>
     </header>
 
     <div id="map"></div>

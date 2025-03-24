@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary-color: #003c3c; /* Dark Green */
-            --secondary-color: white; /* Light Green */
+            --secondary-color: white;
             --text-color: black;
             --hover-color: #1E6F43;
         }
@@ -16,6 +16,20 @@
             font-family: Arial, sans-serif;
             background-color: var(--secondary-color);
             color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .logo {
+            position: absolute;
+            z-index: 999;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 50px;
+            background-color: transparent;
         }
         .navbar {
             background-color: var(--primary-color) !important;
@@ -24,35 +38,64 @@
         .navbar a {
             color: white !important;
             padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
             transition: 0.3s;
         }
+        .nav-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 0px;
+            border-radius: 5px;
+        }
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 50px 20px 80px 20px;
+            padding: 15px 20px 140px 20px;
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
         .hero-heading {
             font-size: 50px;
+            font-family: 'Helvetica Neue', sans-serif;
+        }
+        .hero-btn {
+            background-color: #65B08C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .hero-btn:hover {
+            background-color: #1E6F43;
         }
         .feature-section-override {
-            margin: 100px 0px 0px 0px;
+            margin: 110px 0px 0px 0px;
         }
         .feature-section-override-header {
             font-size: 40px;
         }
         .features-section {
-            padding: 50px 20px;
+            padding: 40px 50px;
             background-color: var(--primary-color);
             color: white;
+            max-width: 80%;
+            height: 320px;
+            border-radius: 20px;
         }
         .feature-card {
             background-color: #65B08C;
+            height: auto;
             padding: 20px;
+            margin: 0px;
             border-radius: 10px;
             border: 2px solid var(--primary-color);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -65,10 +108,15 @@
     </style>
 </head>
 <body>
+    {% if not user.is_authenticated %}
+        <img src="../media/logo/logo2.png" alt="Logo" class="logo" style="top: 41.5%;">
+    {% else %}
+        <img src="../media/logo/logo2.png" alt="Logo" class="logo">
+    {% endif %}
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <a class="navbar-brand" style="font-size: 20px; color: white !important;" href="/">Exe-Plore</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if not user.is_authenticated %}
@@ -76,11 +124,12 @@
                         <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                        <li class="nav-item">
+                        <li class="nav-item"><a class="nav-link">
                             <form method="POST" action="{% url 'logout' %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
+                                <button type="submit" class="nav-btn">Logout</button>
                             </form>
+                        </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -92,9 +141,9 @@
     <header class="hero">
         <div class="container">
             <h1 class="hero-heading">Take action for a sustainable campus!</h1>
-            <p class="lead">Join challenges, explore the campus, and compete for rewards while making a difference.</p>
+            <p class="lead" style="margin:0px 0px 20px 0px;">Join challenges, explore the campus, and compete for rewards while making a difference.</p>
             {% if not user.is_authenticated %}
-                <a href="/accounts/register/" class="btn btn-light btn-lg">Get Started</a>
+                <a href="/accounts/register/" class="hero-btn">Get Started</a>
             {% endif %}
         </div>
     </header>
@@ -123,7 +172,7 @@
                 <div class="col-md-4">
                     <a href="/map/" class="text-decoration-none">
                         <div class="feature-card">
-                            <h3> Explore Campus</h3>
+                            <h3>Explore Campus</h3>
                             <p>Use QR codes or GPS to verify the completion of the challenge.</p>
                         </div>
                     </a>
