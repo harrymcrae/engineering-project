@@ -32,35 +32,54 @@
             transition: 0.3s;
         }
         .leaderboard-section {
+
             padding: 20px;
-            display: flex;
-            justify-content: center;
+            background-color: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            top: 20px;
         }
-        table.leaderboard {
-            background-color: white;
-            color: black;
+
+        .leaderboard-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard {
             width: 100%;
             border-collapse: collapse;
-            border-radius: 10px;
-            box-shadow: 5px grey;
-            margin: 20px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
         }
-        table.leaderboard th, table.leaderboard td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ccc;
-        }
-        table.leaderboard tr:last-child td {
-            border-bottom: none;
-        }
-        .text-decoration-none {
+
+        .leaderboard th {
+            background-color: #4CAF50;
             color: white;
-            text-decoration: none;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .leaderboard td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .leaderboard tr:hover {
+            background-color: #f1f1f1;
         }
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 50px 20px 80px 20px;
+            padding: 50px 20px;
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
@@ -97,19 +116,24 @@
     </header>
 
     <div class="leaderboard-section">
+        <h2 class="leaderboard-title">Leaderboard</h2>
         <table class="leaderboard">
-            <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Points</th>
-            </tr>
-            {% for profile in user_profiles %}
-            <tr>
-                <td>{{ profile.rank }}</td>
-                <td>{{ profile.user.username }}</td>
-                <td>{{ profile.points }}</td>
-            </tr>
-            {% endfor %}
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in user_profiles %}
+                    <tr>
+                        <td>{{ profile.rank }}</td>
+                        <td>{{ profile.user.username }}</td>
+                        <td>{{ profile.points }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </body>

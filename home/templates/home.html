@@ -18,6 +18,11 @@
             color: var(--text-color);
         }
         .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
             background-color: var(--primary-color) !important;
             padding: 15px;
         }
@@ -32,7 +37,8 @@
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 50px 20px 80px 20px;
+            padding: 50px 20px;
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
@@ -49,88 +55,153 @@
             padding: 50px 20px;
             background-color: var(--primary-color);
             color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 60, 60, 0.5);
         }
         .feature-card {
             background-color: #65B08C;
             padding: 20px;
             border-radius: 10px;
             border: 2px solid var(--primary-color);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
             transition: transform 0.3s;
             color: black;
         }
         .feature-card:hover {
             transform: scale(1.05);
         }
+        .carousel-container {
+            position: absolute;
+            top: 56px; 
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 56px);
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .carousel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+            padding-top: 50px;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if not user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                        <li class="nav-item">
-                            <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
-                            </form>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <header class="hero">
-        <div class="container">
-            <h1 class="hero-heading">Take action for a sustainable campus!</h1>
-            <p class="lead">Join challenges, explore the campus, and compete for rewards while making a difference.</p>
-            {% if not user.is_authenticated %}
-                <a href="/accounts/register/" class="btn btn-light btn-lg">Get Started</a>
-            {% endif %}
-        </div>
-    </header>
+    {% load static %}
 
-    <!-- Features Section -->
-    <div class="feature-section-override">
-        <section class="container features-section text-center">
-            <h2 class="feature-section-override-header">How It Works</h2>
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <a href="/challenges/" class="text-decoration-none">
-                        <div class="feature-card">
-                            <h3>Complete Challenges</h3>
-                            <p>Earn points through participating in sustaiability challenges around campus</p>
-                        </div>
-                    </a>
+    <!-- Carousel -->
+    <div class="carousel-container">
+        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="{% static 'images/campus.jpeg' %}" class="d-block w-100" alt="Slide 1">
                 </div>
-                <div class="col-md-4">
-                    <a href="/leaderboard/" class="text-decoration-none">
-                        <div class="feature-card">
-                            <h3>View Leaderboard</h3>
-                            <p>Climb the leaderboard to compete against your friends!</p>
-                        </div>
-                    </a>
+                <div class="carousel-item">
+                    <img src="{% static 'images/quay.jfif' %}" class="d-block w-100" alt="Slide 2">
                 </div>
-                <div class="col-md-4">
-                    <a href="/map/" class="text-decoration-none">
-                        <div class="feature-card">
-                            <h3> Explore Campus</h3>
-                            <p>Use QR codes or GPS to verify the completion of the challenge.</p>
-                        </div>
-                    </a>
+                <div class="carousel-item">
+                    <img src="{% static 'images/campus1.jpeg' %}" class="d-block w-100" alt="Slide 3">
                 </div>
- 
+                <div class="carousel-item">
+                    <img src="{% static 'images/autumn.jpg' %}" class="d-block w-100" alt="Slide 4">
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'images/fountain.jpg' %}" class="d-block w-100" alt="Slide 5">
+                </div>
+                <div class="carousel-item">
+                    <img src="{% static 'images/eastpark.jpg' %}" class="d-block w-100" alt="Slide 6">
+                </div>
             </div>
-        </section>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="/">Sustainability Challenge</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        {% if not user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link" href="/accounts/login/">Login</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
+                            <li class="nav-item">
+                                <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
+                                </form>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="container">
+                <h1 class="hero-heading">Take action for a sustainable campus!</h1>
+                <p class="lead">Join challenges, explore the campus, and compete for rewards while making a difference.</p>
+                {% if not user.is_authenticated %}
+                    <a href="/accounts/register/" class="btn btn-light btn-lg">Get Started</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Features Section -->
+        <div class="feature-section-override">
+            <section class="container features-section text-center">
+                <h2 class="feature-section-override-header">How It Works</h2>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <a href="/challenges/" class="text-decoration-none">
+                            <div class="feature-card">
+                                <h3>Complete Challenges</h3>
+                                <p>Earn points through participating in sustaiability challenges around campus</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/leaderboard/" class="text-decoration-none">
+                            <div class="feature-card">
+                                <h3>View Leaderboard</h3>
+                                <p>Climb the leaderboard to compete against your friends!</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/map/" class="text-decoration-none">
+                            <div class="feature-card">
+                                <h3> Explore Campus</h3>
+                                <p>Use QR codes or GPS to verify the completion of the challenge.</p>
+                            </div>
+                        </a>
+                    </div>
+    
+                </div>
+            </section>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
