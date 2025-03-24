@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from challenges.models import Quiz, Challenge
 from badges.models import Badge
+from dashboard.models import Achievement
 
 class UserProfile(models.Model):
     PLAYER = 'player'
@@ -24,6 +25,7 @@ class UserProfile(models.Model):
     challenges_completed = models.ManyToManyField(Challenge, blank=True)
     quizzes_completed = models.ManyToManyField(Quiz, blank=True)
     badges = models.ManyToManyField(Badge, blank=True)
+    completed_achievements = models.ManyToManyField(Achievement, blank=True, related_name='user_profiles')
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

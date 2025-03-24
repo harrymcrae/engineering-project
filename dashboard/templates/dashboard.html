@@ -78,7 +78,52 @@
             position: relative;
             overflow-y: auto;
         }
-        .completed-challenges {
+        .achievements-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            gap: 10px;
+            padding: 10px;
+        }
+        .achievement-box {
+            background-color: #fafafa;
+            background: linear-gradient(145deg, #f9f9f9, #ececec);
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .achievement-box.completed {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .achievement-box:hover {
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
+            border-color: #c1c1c1; 
+            background-color: #f1f1f1; 
+            background: linear-gradient(145deg, #f1f1f1, #e2e2e2); 
+        }
+        .claimButton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .claimButton.claimed {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+                .completed-challenges {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -104,6 +149,7 @@
             background: linear-gradient(145deg, #f1f1f1, #e2e2e2); 
         }
         .modal,
+        .achievement-modal,
         .challenge-modal {
             display: none; /* Hidden by default */
             position: fixed;
@@ -314,6 +360,23 @@
                 </div>
                 <div class="top_panel">
                     <h3><b>Achievements</b></h3>
+                    <div class="achievements-container">
+                        {% for achievement in achievements %}
+                            <div class="achievement-box 
+                                        {% if achievement in completed_achievements %}completed{% else %}not-completed{% endif %}" 
+                                onclick="openAchievementModal('{{ achievement.achievement_id }}')">
+                                <p><b>{{ achievement.achievement_name }}</b></p>
+                                <p>Points: {{ achievement.points_awarded }}</p>
+                                {% if achievement in completed_achievements %}
+                                    <p class="status completed"></p>
+                                {% else %}
+                                    <p class="status not-completed"></p>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <p>No achievements available</p>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             
@@ -343,6 +406,24 @@
         </section>
 
     </section>
+
+    <!---Achievement Modal-->
+    {% for achievement in achievements %}
+        <div id="{{ achievement.achievement_id }}-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeAchievementModal('{{ achievement.achievement_id }}')">&times;</span>
+                <h2>{{ achievement.achievement_name }}</h2>
+                <p>{{ achievement.achievement_description }}</p>
+                <p><b>Points: {{ achievement.points_awarded}} </b></p>
+                <p id="{{ achievement.achievement_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
+                {% if achievement.achievement_id not in completed_achievements %}
+                    <button class="claimButton" id="{{ achievement.achievement_id }}-complete" onclick="claimAchievement('{{achievement.achievement_id}}', '{{achievement.threshold}}', '{{achievement.achievement_type}}' )">Claim</button>
+                {% else %}
+                    <p style="color: red;"><b>You have already completed this achievement!</b></p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
 
     <!-- Challenge Modal -->
     {% for challenge in challenges %}
@@ -381,6 +462,81 @@
     {% endfor %}
 
     <script>
+        var totalCompletedChallenges = Number('{{ total_completed_challenges }}');
+        var totalCompletedQuizzes = Number('{{ total_completed_quizzes }}');
+        var totalPoints = Number('{{ total_points }}')
+        var totalClaimedBadges = Number('{{ total_claimed_badges }}')
+        console.log("Total completed quizzes:" +'{{ total_completed_quizzes }}');
+        console.log("Total completed challenges:" + '{{ total_completed_challenges }}');
+
+        function openAchievementModal(achievementID) {
+            document.getElementById(achievementID +"-modal").style.display = "flex";
+        }
+
+        function closeAchievementModal(achievementID) {
+            document.getElementById(achievementID +"-modal").style.display = "none"
+        }
+        function claimAchievement(achievementID, threshold, type) {
+            console.log("Type", type);
+            console.log("Threshold", threshold);
+            if (type === "totalc" && totalCompletedChallenges < threshold) {
+                alert(`You need to complete ${threshold} challenges to claim this achievement.`);
+                return;
+            }
+            else if (type === "totalq" && totalCompletedQuizzes < threshold) {
+                alert(`You need to complete ${threshold} quizzes to claim this achievement.`);
+                return;
+            }
+            else if (type === "totalp" && totalPoints < threshold) {
+                alert(`You need ${threshold} points to claim this achievement.`);
+                return;
+            }
+            else if (type === "totalb" && totalClaimedBadges < threshold) {
+                alert(`You need ${threshold} badges to claim this achievement.`);
+                return;
+            }
+
+            fetch(`achievement-reward/${achievementID}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie("csrftoken"),
+                },
+                body: JSON.stringify({action:'achievement_reward'})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message); 
+                    window.location.reload(); 
+                } else {
+                    alert(data.message);  
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the achievement.');
+            });
+        }
+
+        // Run achievement check on page load
+        document.addEventListener("DOMContentLoaded", checkAchievements);
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         function openChallengeModal(challengeID) {
             document.getElementById(challengeID +"-modal").style.display = "flex";
             disableChallenge(challengeID);
