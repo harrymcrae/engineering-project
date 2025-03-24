@@ -100,10 +100,6 @@ def quiz_reward(request, quiz_id):
     if request.method == "POST":
         profile = request.user.profile
         quiz = Quiz.objects.get(quiz_id=quiz_id)
-        badges = profile.badges.all()
-
-        if not badges.filter(name="Einstein").exists():
-            profile.claim_badge("Einstein")
 
         if quiz in profile.quizzes_completed.all():
             return JsonResponse({"success": False, "message": "You have already completed this quiz!"})
@@ -126,10 +122,6 @@ def challenge_reward(request, challenge_id):
     if request.method == "POST":
         profile = request.user.profile
         challenge = Challenge.objects.get(challenge_id=challenge_id)
-        badges = profile.badges.all()
-
-        if not badges.filter(name="Newbie").exists():
-            profile.claim_badge("Newbie")
 
         if challenge in profile.challenges_completed.all():
             return JsonResponse({"success": False, "message": "You have already completed this challenge!"})

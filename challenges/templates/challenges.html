@@ -227,17 +227,6 @@
     </header>
 
     <div class="challenge-container">
-        {% for quiz in quizzes %}
-            {% if quiz.quiz_id not in quizzes_completed %}
-                <div class="quiz-card" id="{{ quiz.quiz_id }}-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
-                    <h3>{{ quiz.quiz_name }}</h3>
-                    <p>{{quiz.quiz_description}}</p>
-                </div>
-            {% endif %}
-        {% empty %}
-            <p>No quizzes available</p>
-        {% endfor %}
-            
         {% for bonus in bonuses %}
             <div class="bonus-card" id="{{ bonus.bonus_id }}-card">
                 <h3>{{ bonus.bonus_name }} </h3>
@@ -247,9 +236,22 @@
                 {% else %}
                     <button class="{{ bonus.bonus_id }}-claim-btn" id="claim-{{ bonus.bonus_id }}">Claim Bonus</button>
                 {% endif %}
+                <p>{{ bonus.points_awarded }} pts</p>
                 </div>
         {% empty %}
             <p>No bonuses available.</p>
+        {% endfor %}
+
+        {% for quiz in quizzes %}
+            {% if quiz.quiz_id not in quizzes_completed %}
+                <div class="quiz-card" id="{{ quiz.quiz_id }}-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+                    <h3>{{ quiz.quiz_name }}</h3>
+                    <p>{{quiz.quiz_description}}</p>
+                    <p>{{ quiz.points_awarded }} pts</p>
+                </div>
+            {% endif %}
+        {% empty %}
+            <p>No quizzes available</p>
         {% endfor %}
 
         {% for challenge in challenges %}
@@ -257,6 +259,7 @@
                 <div class="challenge-card" id="{{ challenge.challenge_id }}-card" onclick="openChallengeModal('{{ challenge.challenge_id }}')" id="{{ challenge.challenge_id }}-card">
                     <h3>{{ challenge.challenge_name }}</h3>
                     <p>Click to view challenge!</p>
+                    <p>{{ challenge.points_awarded }} pts</p>
                 </div>
             {% endif %}
         {% empty %}
@@ -443,7 +446,7 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
-                let challengeID = this.querySelector("input[name='challenge_id']").value;
+                let challengeID = form.querySelector("input[name='challenge_id']").value;
 
                 fetch(`check-has-submission/${challengeID}/`)
                     .then(response => response.json())
@@ -459,7 +462,7 @@
                 form.addEventListener("submit", function (e) {
                     e.preventDefault();
 
-                    let formData = new FormData(this); 
+                    let formData = new FormData(this);
                     let challengeID = this.querySelector("input[name='challenge_id']").value;
 
                     if (!challengeID) {

@@ -25,7 +25,6 @@ class Submission(models.Model):
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='submissions/')
     approved = models.BooleanField(default=False)
-    submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.challenge.challenge_name}"
