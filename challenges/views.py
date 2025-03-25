@@ -10,7 +10,7 @@ import json
 from .forms import SubmissionForm
 
 @login_required
-def challenges_page(request):
+def challenges_page(request): # Render Challenges page, with all challenges, quizzes, bonuses, and
     challenges = Challenge.objects.all()
     quizzes = Quiz.objects.all()
     bonuses = Bonus.objects.all()
@@ -18,7 +18,7 @@ def challenges_page(request):
     user_profile = request.user.profile
     time_remaining = 0
 
-    if user_profile.daily_bonus_time_claimed:
+    if user_profile.daily_bonus_time_claimed: # Calculate time remaining for daily bonus
         time_remaining = 86400000 - int(((timezone.now() - user_profile.daily_bonus_time_claimed).total_seconds())*1000)
     else:
         user_profile.daily_bonus_time_claimed = 0
@@ -49,22 +49,22 @@ def challenges_page(request):
     return render(request, 'challenges.html', context)
 
 
-def claim_daily_bonus(request):
+def claim_daily_bonus(request): # Method to claim daily bonus
     if request.method == "POST":
         profile = request.user.profile
 
-        if profile.daily_bonus_time_claimed:
+        if profile.daily_bonus_time_claimed: # Check if daily bonus has already been claimed
             time_remaining = 86400000 - int(((timezone.now() - profile.daily_bonus_time_claimed).total_seconds())*1000)
             if time_remaining > 0:
                 return JsonResponse({'success': False,'message': 'You have already claimed the daily bonus!','time_remaining': time_remaining
                 })
 
 
-        profile.points += Bonus.objects.get(bonus_id='daily-bonus').points_awarded
+        profile.points += Bonus.objects.get(bonus_id='daily-bonus').points_awarded # Add points to user profile
         profile.daily_bonus_time_claimed = timezone.now()
         profile.save()
 
-        return JsonResponse({
+        return JsonResponse({ # Return success message
             'success': True,
             'message': 'Daily bonus claimed! 🎉',
             'daily_bonus_time_claimed': int(profile.daily_bonus_time_claimed.timestamp() * 1000)  # Return time in milliseconds
@@ -96,7 +96,7 @@ def check_registration_bonus_claimed(request):
 
     return JsonResponse({"registration_bonus_claimed": bonus_claimed})
 
-def quiz_reward(request, quiz_id):
+def quiz_reward(request, quiz_id): # Method to reward user for completing quiz
     if request.method == "POST":
         profile = request.user.profile
         quiz = Quiz.objects.get(quiz_id=quiz_id)
@@ -112,16 +112,16 @@ def quiz_reward(request, quiz_id):
     
     return JsonResponse({"success": False, "message": "Invalid request"})
 
-def check_quiz_completed(request, quiz_id):
+def check_quiz_completed(request, quiz_id): # Method to check if quiz has been completed
     profile = request.user.profile
     quiz_completed = quiz_id in profile.quizzes_completed.values_list('quiz_id', flat=True)
 
     return JsonResponse({"quiz_completed": quiz_completed})
 
-def challenge_reward(request, challenge_id):
+def challenge_reward(request, challenge_id): # Method to reward user for completing challenge
     if request.method == "POST":
         profile = request.user.profile
-        challenge = Challenge.objects.get(challenge_id=challenge_id)
+        challenge = Challenge.objects.get(challenge_id=challenge_id) # Get challenge object
 
         if challenge in profile.challenges_completed.all():
             return JsonResponse({"success": False, "message": "You have already completed this challenge!"})
@@ -134,23 +134,23 @@ def challenge_reward(request, challenge_id):
     
     return JsonResponse({"success": False, "message": "Invalid request"})
 
-def check_challenge_completed(request, challenge_id):
+def check_challenge_completed(request, challenge_id): # Method to check if challenge has been completed
     profile = request.user.profile
     challenge_completed = challenge_id in profile.challenges_completed.values_list('challenge_id', flat=True)
 
     return JsonResponse({"challenge_completed": challenge_completed})
 
-def submit_proof(request, challenge_id):
+def submit_proof(request, challenge_id): # Method to submit proof for challenge
     challenge = Challenge.objects.get(challenge_id=challenge_id)
     user = request.user
 
     existing_submission = Submission.objects.filter(user=user, challenge=challenge, approved=False).first()
-    if existing_submission:
+    if existing_submission: # Check if user already has an unapproved submission
         return JsonResponse({'success': False, 'error': 'You already have an unapproved submission for this challenge.'})
 
-    if request.method == "POST" and request.FILES.get("image"):
+    if request.method == "POST" and request.FILES.get("image"): # Check if request is POST and image is uploaded
 
-        submission = Submission.objects.create(
+        submission = Submission.objects.create( # Create submission object
             user=request.user,
             challenge=challenge,
             image=request.FILES["image"],
@@ -161,7 +161,7 @@ def submit_proof(request, challenge_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"})
 
-def check_has_submission(request, challenge_id):
+def check_has_submission(request, challenge_id): # Method to check if user has already submitted proof for challenge
     challenge = Challenge.objects.get(challenge_id=challenge_id)
 
     has_submission = Submission.objects.filter(user=request.user, challenge=challenge, approved=False).first()

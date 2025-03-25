@@ -21,7 +21,7 @@
             display: flex;
             flex-direction: column;
         }
-        .logo {
+        .logo { /* Refer back to home.html */
             position: absolute;
             z-index: 999;
             top: 8%;
@@ -61,7 +61,7 @@
             box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
-        .content-container {
+        .content-container { /* Class to contain the sidebar and panels */
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -107,14 +107,14 @@
             box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
             background-color: white;
             margin: 0;
-            flex: 1;
+            flex: 1; /* Fill remaining space */
             border-radius: 5px;
             height: 320px;
-            overflow-y: auto;
+            overflow-y: auto; /* Add scrollbar when content exceeds height */
         }
         .panels {
             padding: 20px;
-            flex-grow: 1;
+            flex-grow: 1; /* Fill remaining space */
             text-align: center;
         }
         .panel {
@@ -128,14 +128,14 @@
             overflow-y: auto;
         }
         .achievements-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
-            gap: 10px;
+            display: grid; /* Arrange achievements in a grid */
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Minimum width of 100px */
+            gap: 10px; /* Spacing between achievements */
             padding: 10px;
         }
         .achievement-box {
             background-color: #fafafa;
-            background: linear-gradient(145deg, #f9f9f9, #ececec);
+            background: linear-gradient(145deg, #f9f9f9, #ececec); /* Gradient background */
             border: 1px solid #e0e0e0;
             border-radius: 12px;
             padding: 10px;
@@ -144,12 +144,12 @@
             font-weight: bold;
             color: #333; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out; /* Smooth transition */
         }
 
         .achievement-box.completed {
-            opacity: 0.5;
-            pointer-events: none;
+            opacity: 0.5; /* Dim the achievement */
+            pointer-events: none; /* Disable interaction */
         }
         .achievement-box:hover {
             transform: translateY(-5px); 
@@ -170,13 +170,13 @@
 
         .claimButton.claimed {
             background-color: #ccc;
-            cursor: not-allowed;
+            cursor: not-allowed; /* Disable the button */
         }
                 .completed-challenges {
             display: flex;
-            flex-direction: row;
+            flex-direction: row; /* Align elements horizontally */
             align-items: center;
-            justify-content: space-between;
+            justify-content: space-between; /* Space between elements */
             gap: 20px; 
             padding: 20px; 
             border: 1px solid #e0e0e0;
@@ -191,7 +191,7 @@
         }
 
         .completed-challenges:hover {
-            transform: translateY(-5px); 
+            transform: translateY(-5px); /* Move the element up */
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
             border-color: #c1c1c1; 
             background-color: #f1f1f1; 
@@ -201,15 +201,15 @@
         .achievement-modal,
         .challenge-modal {
             display: none; /* Hidden by default */
-            position: fixed;
-            z-index: 1000;
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top of everything */
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5); /* Dark background */
-            justify-content: center;
-            align-items: center;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
         }
 
         /* Modal Content Box */
@@ -230,7 +230,7 @@
             top: 10px;
             right: 15px;
             font-size: 24px;
-            cursor: pointer;
+            cursor: pointer; /* Add cursor hovering effect */
         }
         .complete-challenge-btn {
             background: var(--primary-color);
@@ -248,7 +248,7 @@
         .quiz-table {
             width: 100%;
             margin-top: 10px;
-            border-collapse: collapse;
+            border-collapse: collapse; /* Collapse borders */
             text-align: center;
         }
 
@@ -270,7 +270,7 @@
             background-color: #e0e0e0;
         }
         .badge-item {
-            display: inline-block; 
+            display: inline-block; /* Display badges in a row */
             margin-right: 20px; 
             margin-bottom: 20px;
             text-align: center;
@@ -293,21 +293,21 @@
             position: absolute; 
             top: 100%; 
             left: 50%; 
-            transform: translateX(-50%); 
+            transform: translateX(-50%); /* Center horizontally */
             background-color: rgba(0, 0, 0, 1);
             color: white;
             padding: 8px 12px;
             border-radius: 5px;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: bold; /* Bold text */
             text-align: center;
             width: 15%; 
             margin-top: 8px; 
-            z-index: 10;
+            z-index: 10; /* Stay on top */
         }
 
         .badge-container:hover .badge-text {
-            display: block;
+            display: block; /* Show the badge text */
         }
 
     </style>
@@ -507,14 +507,14 @@
             console.log("Total completed quizzes:" +'{{ total_completed_quizzes }}');
             console.log("Total completed challenges:" + '{{ total_completed_challenges }}');
 
-            function openAchievementModal(achievementID) {
+            function openAchievementModal(achievementID) { // Add achievementID parameter
                 document.getElementById(achievementID +"-modal").style.display = "flex";
             }
 
-            function closeAchievementModal(achievementID) {
+            function closeAchievementModal(achievementID) { // Add achievementID parameter
                 document.getElementById(achievementID +"-modal").style.display = "none"
             }
-            function claimAchievement(achievementID, threshold, type) {
+            function claimAchievement(achievementID, threshold, type) { // Add type parameter
                 console.log("Type", type);
                 console.log("Threshold", threshold);
                 if (type === "totalc" && totalCompletedChallenges < threshold) {
@@ -534,7 +534,7 @@
                     return;
                 }
 
-                fetch(`achievement-reward/${achievementID}/`, {
+                fetch(`achievement-reward/${achievementID}/`, { // Add achievementID parameter
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -560,7 +560,7 @@
             // Run achievement check on page load
             document.addEventListener("DOMContentLoaded", checkAchievements);
 
-            function getCookie(name) {
+            function getCookie(name) { // Function to get cookie by name
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
                     const cookies = document.cookie.split(';');

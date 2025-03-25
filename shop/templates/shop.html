@@ -19,7 +19,7 @@
             background-color: var(--secondary-color);
             color: var(--text-color);
         }
-        .navbar {
+        .navbar { /* Refer to home.html */
             background-color: var(--primary-color) !important;
             padding: 15px;
         }
@@ -64,18 +64,18 @@
         }
         .badge-card {
             background-color: var(--secondary-color);  
-            border: 10px solid var(--primary-color);
+            border: 10px solid var(--primary-color); /* Add border */
             border-radius: 18px;
             box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
             padding: 15px;
             text-align: center;
             transition: transform 0.3s, box-shadow 0.3s;  
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
             max-width: 250px;
             margin: 10px;
         }
         .badge-card:hover {
-            transform: scale(1.05); 
+            transform: scale(1.05); /* Add scale effect */
             box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
         }
         .badge-card img {
@@ -88,7 +88,7 @@
         .badge-card-container {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; 
+            flex-wrap: wrap;
             gap: 20px;
             padding: 20px;
         }
@@ -102,7 +102,7 @@
             margin-top: 15px;
         }
         .purchase-btn:hover {
-            background: darkblue;
+            background: darkblue; /* Change color on hover */
         }
     </style>
 </head>
@@ -159,17 +159,17 @@
     <!-- Code for purchasing badges -->
      <script>
         function purchaseBadge(badge_name) {
-            fetch(`purchase-badge/${badge_name}/`, {
+            fetch(`purchase-badge/${badge_name}/`, { // Send a POST request to the server using fetch API
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie("csrftoken"),
+                    'X-CSRFToken': getCookie("csrftoken"),  // Include CSRF token in the header
                 },
-                body: JSON.stringify({action:'purchase_badge'})
+                body: JSON.stringify({action:'purchase_badge'}) // Include the action in the body
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.success) { // Check if the purchase was successful
                     alert(data.message);
                     document.getElementById(badge_name+"-card").style.display='none';
                     let pointsElement = document.getElementById("user-points");
@@ -178,20 +178,20 @@
                     alert(data.message);  
                 }
             })
-            .catch(error => {
+            .catch(error => { // Handle errors
                 console.error('Error:', error);
                 alert('An error occurred while purchasing this badge.');
             });
         }
 
-        function getCookie(name) {
+        function getCookie(name) { // Function to get the CSRF token from the cookie
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
                 for (let i = 0; i < cookies.length; i++) {
                     const cookie = cookies[i].trim();
                     if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); // Extract the CSRF token
                         break;
                     }
                 }
@@ -199,8 +199,5 @@
             return cookieValue;
         }
      </script>
-
-
-
 </body>
 </html>
