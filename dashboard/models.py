@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from badges.models import Badge
 
-class Achievement(models.Model):
+class Achievement(models.Model): # Model for Achievements containing fields for achievement name, description, points awarded, threshold, achievement type, and badge awarded
     achievement_name = models.CharField(max_length=50,null=True)
     achievement_description = models.CharField(max_length=255,null=True)
     achievement_id = models.CharField(max_length=10, null=True)

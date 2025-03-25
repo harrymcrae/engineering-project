@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class Migration(migrations.Migration): # Define databse structure for the models
 
     initial = True
 

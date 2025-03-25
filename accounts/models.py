@@ -17,6 +17,7 @@ class UserProfile(models.Model):
         (DEVELOPER, 'Developer'),
     ]
 
+    # This line is required. Links UserProfile to a User model instance.
     user = models.OneToOneField(User,on_delete=models.CASCADE, related_name='profile')
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default=PLAYER)
     points = models.IntegerField(default=0)
@@ -30,12 +31,12 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=User) # Signal to create a user profile when a new user is created
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         user_profile = UserProfile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=User) # Signal to save the user profile when the user is saved
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 

@@ -17,21 +17,43 @@
             background-color: var(--secondary-color);
             color: var(--text-color);
         }
+        .logo { /* Refer to home.html */
+            position: absolute;
+            z-index: 999;
+            top: 8%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            width: 130px; /* Adjust the size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 50px;
+            background-color: transparent;
+            cursor: pointer;
+        }
         .navbar {
             background-color: var(--primary-color) !important;
             padding: 15px;
         }
         .navbar a {
             color: white !important;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
         }
         .navbar a:hover {
             background-color: var(--hover-color);
             transition: 0.3s;
         }
+        .nav-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 0px;
+            border-radius: 5px;
+        }
         .hero {
             background: var(--primary-color);
             color: white;
-            padding: 80px 20px;
+            padding: 10px 0px 40px 0px;
             text-align: center;
             border-bottom: 10px solid var(--secondary-color);
         }
@@ -46,15 +68,16 @@
             box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             color: white;
+            height: 250px;
             max-width: 300px;  /* Limit width */
             text-align: center;
-            flex: 1 1 300px;
+            flex: 1 1 300px; /* Flexbox properties */
             box-sizing: border-box;
         }
 
         .quiz-card:hover,
         .challenge-card:hover {
-            transform: translateY(-22%) scale(1.05);
+            transform: translateY(-22%) scale(1.05); /* Scale and move up */
             box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.3);
         }
         /* Modal Background */
@@ -63,8 +86,8 @@
             display: none; /* Hidden by default */
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
+            left: 0; 
+            top: 0; /* Position top-left corner */
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5); /* Dark background */
@@ -93,7 +116,7 @@
             cursor: pointer;
         }
 
-        .registration-bonus-claim-btn,
+        .registration-bonus-claim-btn, /* Button styles */
         .daily-bonus-claim-btn,
         .complete-challenge-btn {
             background: var(--primary-color);
@@ -120,7 +143,7 @@
 
         .challenge-container {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Wrap to next line */
             align-items: flex-start;
             justify-content: center ;
             gap: 20px;
@@ -128,7 +151,7 @@
         }
 
         /* Adjust for larger screens */
-        @media (min-width: 768px) {
+        @media (min-width: 768px) { /* Medium devices (tablets, 768px and up) */
             .daily-section {
                 flex-direction: row;
                 justify-content: center;
@@ -193,10 +216,12 @@
     </style>
 </head>
 <body>
+    <!-- Logo -->
+    <img src="../media/logo/logo2.png" onclick="window.location.href = '/'" alt="Logo" class="logo">
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="/">Sustainability Challenge</a>
+            <a class="navbar-brand" style="font-size: 20px; color: white !important; margin-left: 20px;" href="/">Exe-Plore</a>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if not user.is_authenticated %}
@@ -204,11 +229,12 @@
                         <li class="nav-item"><a class="nav-link" href="/accounts/register/">Register</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                        <li class="nav-item">
+                        <li class="nav-item"><a class="nav-link">
                             <form method="POST" action="{% url 'logout' %}" style="display:inline;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link" style="color:white;">Logout</button>
+                                <button type="submit" class="nav-btn">Logout</button>
                             </form>
+                        </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -317,9 +343,9 @@
     <script>
         let completedChallenges = JSON.parse('{{ challenges_completed_json|safe }}');
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() { // Wait for the document to load
             completedChallenges.forEach(challengeID => {
-                fetch(`check-challenge-completed/${challengeID}/`)
+                fetch(`check-challenge-completed/${challengeID}/`) // Fetch the challenge completion status
                     .then(response => response.json())
                     .then(data => {
                         if (data.challenge_completed) {
@@ -345,7 +371,7 @@
 
         }
 
-        function disableSubmissionChallenge(challengeID) {
+        function disableSubmissionChallenge(challengeID) { // Disables the challenge if the user has already submitted proof
             let submitButton = document.getElementById(challengeID+"-submit");
             let feedbackElement = document.getElementById(`${challengeID}-feedback`);
 
@@ -400,7 +426,7 @@
             return distance;
         }
 
-        function completeChallenge(challengeID) {
+        function completeChallenge(challengeID) { // Function to complete the challenge
             fetch(`challenge-reward/${challengeID}/`, {
                 method: 'POST',
                 headers: {
@@ -509,7 +535,7 @@
             });
         });
 
-        function openQuizModal(quizID, quizName, quizQuestion, options) {
+        function openQuizModal(quizID, quizName, quizQuestion, options) { // Function to open the quiz modal
             document.getElementById(quizID +"-modal").style.display = "flex";
             document.getElementById(quizID +"-title").textContent = quizName;
             document.getElementById(quizID +"-question").textContent = quizQuestion;
@@ -523,7 +549,7 @@
             document.getElementById(quizID +"-modal").style.display = "none";
         }
 
-        function selectOption(quizID, option, correctAnswer) {
+        function selectOption(quizID, option, correctAnswer) { // Function to select an option
             if (option == correctAnswer) {
                 claimQuizReward(quizID);
                 disableQuiz(quizID);

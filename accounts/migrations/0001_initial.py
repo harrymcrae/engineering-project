@@ -9,16 +9,16 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
+    dependencies = [ # dependencies of the migration
         ('badges', '0002_badge_points_awarded_alter_badge_image'),
         ('challenges', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
-    operations = [
+    operations = [ # operations of the migration
         migrations.CreateModel(
             name='UserProfile',
-            fields=[
+            fields=[ # fields of the model
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('user_type', models.CharField(choices=[('player', 'Player'), ('game_keeper', 'Game Keeper'), ('developer', 'Developer')], default='player', max_length=20)),
                 ('points', models.IntegerField(default=0)),

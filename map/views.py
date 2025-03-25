@@ -4,25 +4,25 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
 @login_required
-def map_view(request):
+def map_view(request): 
     return render(request, 'map.html')
     # Example GeoJSON data (store in a database in a real project)
 
-def geojson_data(request):
-    challengeslist = Challenge.objects.all()
+def geojson_data(request): # This function will return the GeoJSON data for the map
+    challengeslist = Challenge.objects.all() # Get all challenges
     user_profile = request.user.profile
     features = []
 
-    for challenge in challengeslist:
+    for challenge in challengeslist: # Loop through all challenges
         is_completed = challenge in user_profile.challenges_completed.all()
         if not is_completed:
-            features.append({
+            features.append({ # Append the GeoJSON data to the features list
                 "type": "Feature",
                 "geometry": {
                     "type": "Point",
                     "coordinates": [challenge.longitude, challenge.latitude]
                 },
-                "properties": {
+                "properties": { # Properties of the GeoJSON data
                     "name": challenge.challenge_name,
                     "description": challenge.challenge_description,
                     "points": challenge.points_awarded,
