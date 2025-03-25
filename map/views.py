@@ -1,7 +1,9 @@
 from django.http import JsonResponse
 from challenges.models import Challenge 
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def map_view(request):
     return render(request, 'map.html')
     # Example GeoJSON data (store in a database in a real project)

@@ -103,4 +103,3 @@ class ChallengeTests(TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertIn("quiz_completed", response.json())
->>>>>>> ff6e04a (Added tests for dashboard and achievement reward)

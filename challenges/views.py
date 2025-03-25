@@ -56,8 +56,7 @@ def claim_daily_bonus(request):
         if profile.daily_bonus_time_claimed:
             time_remaining = 86400000 - int(((timezone.now() - profile.daily_bonus_time_claimed).total_seconds())*1000)
             if time_remaining > 0:
-                return JsonResponse({'success': False,'message': 'You have already claimed the daily bonus!','time_remaining': time_remaining
-                })
+                return JsonResponse({'success': False,'message': 'You have already claimed the daily bonus!','time_remaining': time_remaining})
 
 
         profile.points += Bonus.objects.get(bonus_id='daily-bonus').points_awarded
@@ -125,7 +124,7 @@ def challenge_reward(request, challenge_id):
 
         if challenge in profile.challenges_completed.all():
             return JsonResponse({"success": False, "message": "You have already completed this challenge!"})
-        
+
         profile.points += challenge.points_awarded
         profile.challenges_completed.add(challenge)
         profile.save()
@@ -163,11 +162,32 @@ def submit_proof(request, challenge_id):
 
 def check_has_submission(request, challenge_id):
     challenge = Challenge.objects.get(challenge_id=challenge_id)
+    submission = Submission.objects.filter(user=request.user, challenge=challenge).first()
 
-    has_submission = Submission.objects.filter(user=request.user, challenge=challenge, approved=False).first()
+    if not submission:
+        return JsonResponse({"has_submission": False, "approved": False})
 
-    return JsonResponse({"has_submission": bool(has_submission)})
+    return JsonResponse({"has_submission": True, "approved":submission.approved})
 
+def submission_reward(request, challenge_id):
+    if request.method == "POST":
+        profile = request.user.profile
+        challenge = Challenge.objects.get(challenge_id=challenge_id)
 
+        submission = Submission.objects.filter(user=request.user, challenge=challenge, approved=True).first()
 
+        if not submission:
+            return JsonResponse({"success": False, "message": "No approved submission found!"})
 
+        if challenge in profile.challenges_completed.all():
+            return JsonResponse({"success": False, "message": "You have already completed this challenge!"})
+
+        profile.points += challenge.points_awarded
+        profile.challenges_completed.add(challenge)
+        profile.save()
+
+        submission.delete()
+
+        return JsonResponse({"success": True, "message": "Challenge completed! 🎉"})
+
+    return JsonResponse({"success": False, "message": "Invalid request"})

@@ -12,4 +12,5 @@ urlpatterns = [
     path('check-challenge-completed/<str:challenge_id>/', views.check_challenge_completed, name='check_challenge_completed'),
     path('submit-proof/<str:challenge_id>/', views.submit_proof, name='submit_proof'),
     path('check-has-submission/<str:challenge_id>/', views.check_has_submission, name='check_has_submission'),
+    path('submission-reward/<str:challenge_id>/', views.submission_reward, name='submission_reward'),
 ]

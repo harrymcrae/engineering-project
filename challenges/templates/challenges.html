@@ -271,9 +271,6 @@
                 <span class="close-btn" onclick="closeChallengeModal('{{ challenge.challenge_id }}')">&times;</span>
                 <h2>{{ challenge.challenge_name }}</h2>
                 <p>{{ challenge.challenge_description }}</p>
-                <img src="/media/qr_codes/challenge_{{ challenge.id }}_qr.png" alt="Scan to complete" style="max-width: 100%; margin: 10px 0;"> <!--Test-->
-                <p><small>Scan this QR code at the challenge location to complete it instantly.</small></p>
-
                 <p id="{{ challenge.challenge_id }}-feedback" style="display: none; justify-content: center; color: red;"></p>
                 {% if challenge.latitude != 0 %}
                     <button class="complete-challenge-btn" id="{{ challenge.challenge_id }}-complete" onclick="checkLocation('{{ challenge.challenge_id }}', '{{ challenge.latitude }}', '{{ challenge.longitude }}')">Complete Challenge</button>
@@ -319,6 +316,7 @@
     <!-- Code for Location Based Challenges -->
     <script>
         let completedChallenges = JSON.parse('{{ challenges_completed_json|safe }}');
+        console.log("A");
 
         document.addEventListener("DOMContentLoaded", function() {
             completedChallenges.forEach(challengeID => {
@@ -326,6 +324,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.challenge_completed) {
+                            console.log("ABC");
                             disableChallenge(challengeID);
                         }
                     })
@@ -344,7 +343,10 @@
         }
 
         function disableChallenge(challengeID) {
-            document.getElementById(challengeID+"-card").style.display='none';
+            let challengeCard = document.getElementById(challengeID+"-card");
+            if(challengeCard) {
+                challengeCard.style.display = "none"; 
+            }
 
         }
 
@@ -416,6 +418,7 @@
             .then(data => {
                 if (data.success) {
                     alert(data.message);  
+                    console.log("Points have been awarded");
                 } else {
                     alert(data.message);  
                 }
@@ -444,53 +447,83 @@
         // Code for Submission Based Challenges
         let pendingSubmissions = JSON.parse('{{ pending_submissions_json|safe }}');
 
+        console.log("b");
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
-                let challengeID = this.querySelector("input[name='challenge_id']").value;
+        document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
+            let challengeID = form.querySelector("input[name='challenge_id']").value; 
 
-                fetch(`check-has-submission/${challengeID}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.has_submission) {
-                            disableSubmissionChallenge(challengeID);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+            fetch(`check-has-submission/${challengeID}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_submission) {
+                        console.log("Submission found");
+                        disableSubmissionChallenge(challengeID);
 
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
+                        if(data.approved) {
+                            console.log("Approved");
 
-                    let formData = new FormData(this); 
-                    let challengeID = this.querySelector("input[name='challenge_id']").value;
+                            fetch(`submission-reward/${challengeID}/`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                                },
+                                body: JSON.stringify({ action: "submission_reward" }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);
+                                    console.log("Points have been awarded");
+                                    disableChallenge(challengeID);
+                                } else {
+                                    console.error("Reward failed:", data.message);
+                                }
+                            })
+                            .catch(error => console.error("Error awarding points:", error));
 
-                    if (!challengeID) {
-                        alert("Error: Challenge ID is missing!");
-                        return;
-                    }
-
-                    fetch(`submit-proof/${challengeID}/`, {
-                        method: "POST",
-                        body: formData,
-                        headers: {
-                            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Submission successful!");
-                            closeChallengeModal(challengeID);
-                            disableSubmissionChallenge(challengeID);
                         } else {
-                            alert("Submission failed: " + data.error);
+                            console.log("No approved subs");
                         }
-                    })
-                    .catch(error => console.error("Error:", error));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
                 });
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                let formData = new FormData(form); 
+                let challengeID = form.querySelector("input[name='challenge_id']").value; 
+
+                if (!challengeID) {
+                    alert("Error: Challenge ID is missing!");
+                    return;
+                }
+
+                fetch(`submit-proof/${challengeID}/`, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Submission successful!");
+                        closeChallengeModal(challengeID);
+                        disableSubmissionChallenge(challengeID);
+                    } else {
+                        alert("Submission failed: " + data.error);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
             });
         });
+    });
+
     </script>
 
     <!-- Code for Quizzes -->
@@ -539,7 +572,10 @@
         }
 
         function disableQuiz(quizID) {
-            document.getElementById(quizID+"-card").style.display='none';
+            let quizCard = document.getElementById(quizID+"-card")
+            if(quizCard) {
+                quizCard.style.display='none';
+            }
         }
 
         function claimQuizReward(quizID) {
