@@ -253,17 +253,6 @@
     </header>
 
     <div class="challenge-container">
-        {% for quiz in quizzes %}
-            {% if quiz.quiz_id not in quizzes_completed %}
-                <div class="quiz-card" id="{{ quiz.quiz_id }}-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
-                    <h3>{{ quiz.quiz_name }}</h3>
-                    <p>{{quiz.quiz_description}}</p>
-                </div>
-            {% endif %}
-        {% empty %}
-            <p>No quizzes available</p>
-        {% endfor %}
-            
         {% for bonus in bonuses %}
             <div class="bonus-card" id="{{ bonus.bonus_id }}-card">
                 <h3>{{ bonus.bonus_name }} </h3>
@@ -273,9 +262,22 @@
                 {% else %}
                     <button class="{{ bonus.bonus_id }}-claim-btn" id="claim-{{ bonus.bonus_id }}">Claim Bonus</button>
                 {% endif %}
+                <p>{{ bonus.points_awarded }}pts</p>
                 </div>
         {% empty %}
             <p>No bonuses available.</p>
+        {% endfor %}
+    
+        {% for quiz in quizzes %}
+            {% if quiz.quiz_id not in quizzes_completed %}
+                <div class="quiz-card" id="{{ quiz.quiz_id }}-card" onclick="openQuizModal('{{ quiz.quiz_id }}','{{ quiz.quiz_name }}', '{{ quiz.quiz_question}}', ['{{ quiz.quiz_option_one }}', '{{ quiz.quiz_option_two }}', '{{ quiz.quiz_option_three }}', '{{ quiz.quiz_option_four }}'])">
+                    <h3>{{ quiz.quiz_name }}</h3>
+                    <p>{{quiz.quiz_description}}</p>
+                    <p>{{ quiz.points_awarded }}pts</p>
+                </div>
+            {% endif %}
+        {% empty %}
+            <p>No quizzes available</p>
         {% endfor %}
 
         {% for challenge in challenges %}
@@ -283,6 +285,7 @@
                 <div class="challenge-card" id="{{ challenge.challenge_id }}-card" onclick="openChallengeModal('{{ challenge.challenge_id }}')" id="{{ challenge.challenge_id }}-card">
                     <h3>{{ challenge.challenge_name }}</h3>
                     <p>Click to view challenge!</p>
+                    <p>{{ challenge.points_awarded }}pts</p>
                 </div>
             {% endif %}
         {% empty %}
@@ -342,6 +345,7 @@
     <!-- Code for Location Based Challenges -->
     <script>
         let completedChallenges = JSON.parse('{{ challenges_completed_json|safe }}');
+        console.log("A");
 
         document.addEventListener("DOMContentLoaded", function() { // Wait for the document to load
             completedChallenges.forEach(challengeID => {
@@ -349,6 +353,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.challenge_completed) {
+                            console.log("ABC");
                             disableChallenge(challengeID);
                         }
                     })
@@ -367,7 +372,10 @@
         }
 
         function disableChallenge(challengeID) {
-            document.getElementById(challengeID+"-card").style.display='none';
+            let challengeCard = document.getElementById(challengeID+"-card");
+            if(challengeCard) {
+                challengeCard.style.display = "none"; 
+            }
 
         }
 
@@ -439,6 +447,7 @@
             .then(data => {
                 if (data.success) {
                     alert(data.message);  
+                    console.log("Points have been awarded");
                 } else {
                     alert(data.message);  
                 }
@@ -467,53 +476,83 @@
         // Code for Submission Based Challenges
         let pendingSubmissions = JSON.parse('{{ pending_submissions_json|safe }}');
 
+        console.log("b");
         document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
-                let challengeID = this.querySelector("input[name='challenge_id']").value;
+        document.querySelectorAll("form[id^='submissionForm']").forEach(form => {
+            let challengeID = form.querySelector("input[name='challenge_id']").value; 
 
-                fetch(`check-has-submission/${challengeID}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.has_submission) {
-                            disableSubmissionChallenge(challengeID);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                    });
+            fetch(`check-has-submission/${challengeID}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_submission) {
+                        console.log("Submission found");
+                        disableSubmissionChallenge(challengeID);
 
-                form.addEventListener("submit", function (e) {
-                    e.preventDefault();
+                        if(data.approved) {
+                            console.log("Approved");
 
-                    let formData = new FormData(this); 
-                    let challengeID = this.querySelector("input[name='challenge_id']").value;
+                            fetch(`submission-reward/${challengeID}/`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                                },
+                                body: JSON.stringify({ action: "submission_reward" }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert(data.message);
+                                    console.log("Points have been awarded");
+                                    disableChallenge(challengeID);
+                                } else {
+                                    console.error("Reward failed:", data.message);
+                                }
+                            })
+                            .catch(error => console.error("Error awarding points:", error));
 
-                    if (!challengeID) {
-                        alert("Error: Challenge ID is missing!");
-                        return;
-                    }
-
-                    fetch(`submit-proof/${challengeID}/`, {
-                        method: "POST",
-                        body: formData,
-                        headers: {
-                            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Submission successful!");
-                            closeChallengeModal(challengeID);
-                            disableSubmissionChallenge(challengeID);
                         } else {
-                            alert("Submission failed: " + data.error);
+                            console.log("No approved subs");
                         }
-                    })
-                    .catch(error => console.error("Error:", error));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
                 });
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                let formData = new FormData(form); 
+                let challengeID = form.querySelector("input[name='challenge_id']").value; 
+
+                if (!challengeID) {
+                    alert("Error: Challenge ID is missing!");
+                    return;
+                }
+
+                fetch(`submit-proof/${challengeID}/`, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Submission successful!");
+                        closeChallengeModal(challengeID);
+                        disableSubmissionChallenge(challengeID);
+                    } else {
+                        alert("Submission failed: " + data.error);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
             });
         });
+    });
+
     </script>
 
     <!-- Code for Quizzes -->
@@ -562,7 +601,10 @@
         }
 
         function disableQuiz(quizID) {
-            document.getElementById(quizID+"-card").style.display='none';
+            let quizCard = document.getElementById(quizID+"-card")
+            if(quizCard) {
+                quizCard.style.display='none';
+            }
         }
 
         function claimQuizReward(quizID) {

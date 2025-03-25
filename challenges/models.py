@@ -29,10 +29,6 @@ class Submission(models.Model): # Submission model, contains the user, challenge
     def __str__(self):
         return f"{self.user.username} - {self.challenge.challenge_name}"
     
-@receiver(post_save, sender=Submission)
-def add_to_completed_challenges(sender, instance, **kwargs):
-    if instance.approved:
-        instance.user.profile.challenges_completed.add(instance.challenge)
 
 class Bonus(models.Model): # Bonus model, contains the bonus name, description, id and points awarded
     bonus_name = models.CharField(max_length=50,null=True)
