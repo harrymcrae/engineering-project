@@ -35,6 +35,8 @@ class UserProfile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         user_profile = UserProfile.objects.create(user=instance)
+        badge = Badge.objects.get(name="First Timer")
+        user_profile.badges.add(badge)
 
 @receiver(post_save, sender=User) # Signal to save the user profile when the user is saved
 def save_user_profile(sender, instance, **kwargs):
